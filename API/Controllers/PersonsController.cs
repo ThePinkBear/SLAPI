@@ -1,0 +1,116 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Test.Models;
+
+namespace TestAPI.Controllers
+{
+  [Route("api/[controller]")]
+    [ApiController]
+    public class PersonsController : ControllerBase
+    {
+        private readonly PersonsContext _context;
+
+        public PersonsController(PersonsContext context)
+        {
+            _context = context;
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Person>> GetPerson(string id)
+        {
+          if (_context.Person == null)
+          {
+              return NotFound();
+          }
+            var person = await _context.Person.FindAsync(id);
+
+            if (person == null)
+            {
+                return NotFound();
+            }
+
+            return person;
+        }
+
+    
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutPerson(string id, Person person)
+        {
+            if (id != person.PersonId)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(person).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!PersonExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Person>> PostPerson(Person person)
+        {
+          if (_context.Person == null)
+          {
+              return Problem("Entity set 'PeopleContext.Person'  is null.");
+          }
+            _context.Person.Add(person);
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (PersonExists(person.PersonId))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return CreatedAtAction("GetPerson", new { id = person.PersonId }, person);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePerson(string id)
+        {
+            if (_context.Person == null)
+            {
+                return NotFound();
+            }
+            var person = await _context.Person.FindAsync(id);
+            if (person == null)
+            {
+                return NotFound();
+            }
+
+            _context.Person.Remove(person);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool PersonExists(string id)
+        {
+            return (_context.Person?.Any(e => e.PersonId == id)).GetValueOrDefault();
+        }
+    }
+}
