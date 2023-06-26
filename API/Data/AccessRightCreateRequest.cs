@@ -1,8 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Test.Models;
 
 public class AccessRightCreateRequest
 {
-    public string BadgeName { get; set; }
-    public string PersonPrimaryId { get; set; }
-    public string BadgeId { get; set; }
+    [Required]
+    public string BadgeName { get; set; } = default!;
+    [Required]
+    public string PersonPrimaryId { get; set; } = default!;
+    [Required]
+    public string BadgeId { get; set; } = default!;
 }
