@@ -8,16 +8,18 @@ namespace TestAPI.Controllers
   public class PersonsController : ControllerBase
   {
     private readonly HttpClient _client;
+    private readonly string? _url;
 
-    public PersonsController(HttpClient client)
+    public PersonsController(HttpClient client, IConfiguration config)
     {
         _client = client;
+        _url = config.GetValue<string>("ExosUrl");
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Person>> GetPerson(string id)
     {
-      var persons = await _client.GetFromJsonAsync<List<Person>>($"v1.0/persons");
+      var persons = await _client.GetFromJsonAsync<List<Person>>($"{_url}/v1.0/persons");
 
       var person = persons == null ? null : persons.FirstOrDefault(x => x.PersonId == id);
 
@@ -28,7 +30,7 @@ namespace TestAPI.Controllers
     [HttpPut("{id}")]
     public async Task<IActionResult> PutPerson(string id, PersonCreateRequest person)
     {
-      var updatedPerson = await _client.PutAsJsonAsync($"v1.0/persons/{id}/update", person);
+      var updatedPerson = await _client.PutAsJsonAsync($"{_url}/v1.0/persons/{id}/update", person);
 
       //TODO: Do some verification with updatedPerson.
 
@@ -47,7 +49,7 @@ namespace TestAPI.Controllers
             PinCode = person.PinCode
         };
         // TODO: Check what you get back from Exos.
-        var createdPerson = await _client.PostAsJsonAsync("v1.0/persons/create", personToCreate);
+        var createdPerson = await _client.PostAsJsonAsync($"{_url}/v1.0/persons/create", personToCreate);
 
         return CreatedAtAction("GetPerson", new { id = personToCreate.PersonId }, createdPerson);
     }
@@ -55,7 +57,7 @@ namespace TestAPI.Controllers
     [HttpDelete("{id}")]
     public IActionResult DeletePerson(string id)
     {
-        _client.DeleteAsync($"v1.0/persons/{id}/delete");
+        _client.DeleteAsync($"{_url}/v1.0/persons/{id}/delete");
         return NoContent();
     }
   }

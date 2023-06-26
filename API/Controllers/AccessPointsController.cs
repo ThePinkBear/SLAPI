@@ -9,16 +9,18 @@ namespace TestAPI.Controllers
     public class AccessPointsController : ControllerBase
     {
         private readonly HttpClient _client;
+        private readonly string? _url;
 
-      public AccessPointsController(HttpClient client)
+      public AccessPointsController(HttpClient client, IConfiguration config)
       {
         _client = client;
+        _url = config.GetValue<string>("ExosUrl");
       }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AccessPoint>>> GetAccessPoints()
         {
-          var accessPoints = await _client.GetFromJsonAsync<List<AccessPoint>>($"v1.0/accesspoints");
+          var accessPoints = await _client.GetFromJsonAsync<List<AccessPoint>>($"{_url}/v1.0/accesspoints");
 
           return accessPoints == null ? NotFound() : accessPoints;
         }

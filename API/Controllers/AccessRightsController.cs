@@ -9,16 +9,18 @@ namespace TestAPI.Controllers
   public class AccessRightsController : ControllerBase
   {
     private readonly HttpClient _client;
+    private readonly string? _url;
 
-    public AccessRightsController(HttpClient client)
+    public AccessRightsController(HttpClient client, IConfiguration config)
     {
       _client = client;
+      _url = config.GetValue<string>("ExosUrl");
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<AccessRight>> GetAccessRight(string id)
     {
-      var accessRights = await _client.GetFromJsonAsync<List<AccessRight>>($"v1.0/accessrights");
+      var accessRights = await _client.GetFromJsonAsync<List<AccessRight>>($"{_url}/v1.0/accessrights");
 
       var accessRight = accessRights == null ? null : accessRights.FirstOrDefault(x => x.PersonPrimaryId == id);
 
@@ -26,18 +28,21 @@ namespace TestAPI.Controllers
     }
     
     [HttpPost]
-    public async Task<ActionResult<Person>> CreateCard(AccessRightCreateRequest accessRight)
+    public Task<ActionResult<Person>> AssignAccessRight(AccessRightCreateRequest accessRight)
     {
-      var newAccessRight = new AccessRight
-      {
-        BadgeId = accessRight.BadgeId,
-        BadgeName = accessRight.BadgeName,
-        PersonPrimaryId = accessRight.PersonPrimaryId
-      };
-    
-      var createdAccessRight = await _client.PostAsJsonAsync("v1.0/accessrights/create", newAccessRight);
+      throw new NotImplementedException();
 
-      return CreatedAtAction("GetAccessRight", new { id = accessRight.PersonPrimaryId }, createdAccessRight);
+      // TODO: Assign Accessright here??.
+      // var newAccessRight = new AccessRight
+      // {
+      //   BadgeId = accessRight.BadgeId,
+      //   BadgeName = accessRight.BadgeName,
+      //   PersonPrimaryId = accessRight.PersonPrimaryId
+      // };
+    
+      // var createdAccessRight = await _client.PostAsJsonAsync($"{_url}/v1.0/accessrights/create", newAccessRight);
+
+      // return CreatedAtAction("GetAccessRight", new { id = accessRight.PersonPrimaryId }, createdAccessRight);
     }
   }
 }

@@ -9,16 +9,18 @@ namespace TestAPI.Controllers
     public class SchedulesController : ControllerBase
     {
         private readonly HttpClient _client;
+        private readonly string? _url;
 
-        public SchedulesController(HttpClient client)
+        public SchedulesController(HttpClient client, IConfiguration config)
         {
           _client = client;
+          _url = config.GetValue<string>("ExosUrl");
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Schedule>>> GetSchedules()
         {
-          var schedules = await _client.GetFromJsonAsync<List<Schedule>>($"v1.0/schedules");
+          var schedules = await _client.GetFromJsonAsync<List<Schedule>>($"{_url}/v1.0/schedules");
 
           return schedules == null ? NotFound() : schedules;
         }
