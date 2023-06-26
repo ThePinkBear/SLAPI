@@ -8,108 +8,44 @@ namespace TestAPI.Controllers
     [ApiController]
     public class CardsController : ControllerBase
     {
-        private readonly PersonsContext _context;
+        private readonly HttpClient _client;
 
-        public CardsController(PersonsContext context)
+        public CardsController(HttpClient client)
         {
-            _context = context;
+            _client = client;
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Person>> GetCard(string id)
+        public async Task<ActionResult<Badge>> GetCard(string id)
         {
-          if (_context.Person == null)
-          {
-              return NotFound();
-          }
-            var person = await _context.Person.FindAsync(id);
+          var badges = await _client.GetFromJsonAsync<List<Badge>>($"v1.0/badges");
 
-            if (person == null)
-            {
-                return NotFound();
-            }
+          var badge = badges == null ? null : badges.FirstOrDefault(x => x.BadgeId == id);
 
-            return person;
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> EditCard(string id, Person person)
-        {
-            if (id != person.PersonId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(person).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CardExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return badge == null ? NotFound() : badge;
         }
 
         [HttpPost]
-        public async Task<ActionResult<Person>> CreateCard(Person person)
+        public async Task<ActionResult<Badge>> CreateCard(BadgeCreateRequest badge)
         {
-          if (_context.Person == null)
+          var newBadge = new Badge
           {
-              return Problem("Entity set 'PeopleContext.Person'  is null.");
-          }
-            _context.Person.Add(person);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (CardExists(person.PersonId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+              BadgeId = Guid.NewGuid().ToString(),
+              BadgeName = badge.BadgeName,
+              PersonPrimaryId = badge.PersonPrimaryId
+          };
+          var createdBadge = await _client.PostAsJsonAsync("v1.0/badges/create", newBadge);
 
-            return CreatedAtAction("GetPerson", new { id = person.PersonId }, person);
+          //TODO: Do some verification with createdBadge.
+
+          return CreatedAtAction("GetPerson", new { id = newBadge.PersonPrimaryId }, newBadge);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCard(string id)
         {
-            if (_context.Person == null)
-            {
-                return NotFound();
-            }
-            var person = await _context.Person.FindAsync(id);
-            if (person == null)
-            {
-                return NotFound();
-            }
-
-            _context.Person.Remove(person);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool CardExists(string id)
-        {
-            return (_context.Person?.Any(e => e.PersonId == id)).GetValueOrDefault();
+          var deletedBadge = await _client.DeleteAsync($"v1.0/badges/{id}/delete");
+          return NoContent();
         }
     }
 }

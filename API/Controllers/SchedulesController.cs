@@ -8,21 +8,19 @@ namespace TestAPI.Controllers
     [ApiController]
     public class SchedulesController : ControllerBase
     {
-        private readonly PersonsContext _context;
+        private readonly HttpClient _client;
 
-        public SchedulesController(PersonsContext context)
+        public SchedulesController(HttpClient client)
         {
-            _context = context;
+          _client = client;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Schedule>>> GetSchedules()
         {
-          if (_context.Schedule == null)
-          {
-              return NotFound();
-          }
-            return await _context.Schedule.ToListAsync();
+          var schedules = await _client.GetFromJsonAsync<List<Schedule>>($"v1.0/schedules");
+
+          return schedules == null ? NotFound() : schedules;
         }
     }
 }

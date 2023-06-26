@@ -8,21 +8,19 @@ namespace TestAPI.Controllers
     [ApiController]
     public class AccessPointsController : ControllerBase
     {
-        private readonly PersonsContext _context;
+        private readonly HttpClient _client;
 
-        public AccessPointsController(PersonsContext context)
-        {
-            _context = context;
-        }
+      public AccessPointsController(HttpClient client)
+      {
+        _client = client;
+      }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AccessPoint>>> GetCards()
+        public async Task<ActionResult<IEnumerable<AccessPoint>>> GetAccessPoints()
         {
-          if (_context.Person == null)
-          {
-              return NotFound();
-          }
-            return await _context.AccessPoint.ToListAsync();
+          var accessPoints = await _client.GetFromJsonAsync<List<AccessPoint>>($"v1.0/accesspoints");
+
+          return accessPoints == null ? NotFound() : accessPoints;
         }
     }
 }

@@ -1,116 +1,62 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Test.Models;
 
 namespace TestAPI.Controllers
 {
   [Route("api/[controller]")]
-    [ApiController]
-    public class PersonsController : ControllerBase
+  [ApiController]
+  public class PersonsController : ControllerBase
+  {
+    private readonly HttpClient _client;
+
+    public PersonsController(HttpClient client)
     {
-        private readonly PersonsContext _context;
-
-        public PersonsController(PersonsContext context)
-        {
-            _context = context;
-        }
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Person>> GetPerson(string id)
-        {
-          if (_context.Person == null)
-          {
-              return NotFound();
-          }
-            var person = await _context.Person.FindAsync(id);
-
-            if (person == null)
-            {
-                return NotFound();
-            }
-
-            return person;
-        }
-
-    
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPerson(string id, Person person)
-        {
-            if (id != person.PersonId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(person).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PersonExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<Person>> PostPerson(Person person)
-        {
-          if (_context.Person == null)
-          {
-              return Problem("Entity set 'PeopleContext.Person'  is null.");
-          }
-            _context.Person.Add(person);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (PersonExists(person.PersonId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetPerson", new { id = person.PersonId }, person);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePerson(string id)
-        {
-            if (_context.Person == null)
-            {
-                return NotFound();
-            }
-            var person = await _context.Person.FindAsync(id);
-            if (person == null)
-            {
-                return NotFound();
-            }
-
-            _context.Person.Remove(person);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool PersonExists(string id)
-        {
-            return (_context.Person?.Any(e => e.PersonId == id)).GetValueOrDefault();
-        }
+        _client = client;
     }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Person>> GetPerson(string id)
+    {
+      var persons = await _client.GetFromJsonAsync<List<Person>>($"v1.0/persons");
+
+      var person = persons == null ? null : persons.FirstOrDefault(x => x.PersonId == id);
+
+      return person == null ? NotFound() : person;
+    }
+
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> PutPerson(string id, PersonCreateRequest person)
+    {
+      var updatedPerson = await _client.PutAsJsonAsync($"v1.0/persons/{id}/update", person);
+
+      //TODO: Do some verification with updatedPerson.
+
+      return NoContent();
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<Person>> PostPerson(PersonCreateRequest person)
+    {
+        var personToCreate = new Person
+        {
+            PersonId = Guid.NewGuid().ToString(),
+            FirstName = person.FirstName,
+            LastName = person.LastName,
+            Department = person.Department,
+            PinCode = person.PinCode
+        };
+        // TODO: Check what you get back from Exos.
+        var createdPerson = await _client.PostAsJsonAsync("v1.0/persons/create", personToCreate);
+
+        return CreatedAtAction("GetPerson", new { id = personToCreate.PersonId }, createdPerson);
+    }
+
+    [HttpDelete("{id}")]
+    public IActionResult DeletePerson(string id)
+    {
+        _client.DeleteAsync($"v1.0/persons/{id}/delete");
+        return NoContent();
+    }
+  }
 }
