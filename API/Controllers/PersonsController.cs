@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Test.Models;
+using Newtonsoft.Json;
+using System.Net;
 
 namespace TestAPI.Controllers
 {
@@ -12,8 +14,8 @@ namespace TestAPI.Controllers
 
     public PersonsController(HttpClient client, IConfiguration config)
     {
-        _client = client;
-        _url = config.GetValue<string>("ExosUrl");
+      _client = client;
+      _url = config.GetValue<string>("ExosUrl");
     }
 
     [HttpGet("{id}")]
@@ -23,42 +25,67 @@ namespace TestAPI.Controllers
 
       var person = persons == null ? null : persons.FirstOrDefault(x => x.PersonId == id);
 
-      return person == null ? NotFound() : person;
+      return person == null ? NotFound() : Ok(person);
     }
 
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutPerson(string id, PersonCreateRequest person)
+    public async Task<IActionResult> PutPerson(string id, PersonRequest person)
     {
-      var updatedPerson = await _client.PutAsJsonAsync($"{_url}/v1.0/persons/{id}/update", person);
+      if (GetPerson(id) == null) return BadRequest();
 
-      //TODO: Do some verification with updatedPerson.
+      var result = await _client.PutAsJsonAsync($"{_url}/v1.0/persons/{id}/update", person);
 
-      return NoContent();
+      return !result.IsSuccessStatusCode ? StatusCode(500) : NoContent() ;
     }
 
     [HttpPost]
-    public async Task<ActionResult<Person>> PostPerson(PersonCreateRequest person)
+    public async Task<ActionResult<Person>> PostPerson(PersonRequest person)
     {
-        var personToCreate = new Person
-        {
-            PersonId = Guid.NewGuid().ToString(),
-            FirstName = person.FirstName,
-            LastName = person.LastName,
-            Department = person.Department,
-            PinCode = person.PinCode
-        };
-        // TODO: Check what you get back from Exos.
-        var createdPerson = await _client.PostAsJsonAsync($"{_url}/v1.0/persons/create", personToCreate);
+      var createdPerson = new Person
+      {
+        PersonId = Guid.NewGuid().ToString(),
+        PrimaryId = person.PrimaryId,
+        FirstName = person.FirstName,
+        LastName = person.LastName,
+        Department = person.Department,
+        PinCode = person.PinCode
+      };
 
-        return CreatedAtAction("GetPerson", new { id = personToCreate.PersonId }, createdPerson);
+      /// <summary>
+      /// This is what you get back from Exos.
+      /// {
+      ///   Value: {  
+      ///     "PersonId": "string"
+      ///   },
+      ///   "TimeElapsed": 2319
+      /// }
+      /// </summary>
+      var response = await _client.PostAsJsonAsync($"{_url}/v1.0/persons/create", createdPerson);
+
+      if (!response.IsSuccessStatusCode)
+      {
+        return response.StatusCode switch
+        {
+          HttpStatusCode.BadRequest => BadRequest(),
+          HttpStatusCode.Unauthorized => Unauthorized(),
+          HttpStatusCode.Forbidden => Forbid(),
+          HttpStatusCode.NotFound => NotFound(),
+          _ => StatusCode(500)
+        };
+      }
+
+      return CreatedAtRoute("GetPerson", new { id = createdPerson.PrimaryId }, person);
     }
 
     [HttpDelete("{id}")]
-    public IActionResult DeletePerson(string id)
+    public async Task<IActionResult> DeletePerson(string id)
     {
-        _client.DeleteAsync($"{_url}/v1.0/persons/{id}/delete");
-        return NoContent();
+      if (GetPerson(id) == null) return NotFound();
+
+      var response = await _client.PostAsync($"{_url}/v1.0/persons/{id}/delete", null);
+
+      return response.IsSuccessStatusCode ? NoContent() : StatusCode(500);
     }
   }
 }
