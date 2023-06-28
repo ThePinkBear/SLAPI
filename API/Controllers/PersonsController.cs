@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Test.Models;
-using Newtonsoft.Json;
 using System.Net;
 
 namespace TestAPI.Controllers
@@ -23,7 +22,7 @@ namespace TestAPI.Controllers
     {
       var persons = await _client.GetFromJsonAsync<List<Person>>($"{_url}/v1.0/persons");
 
-      var person = persons == null ? null : persons.FirstOrDefault(x => x.PersonId == id);
+      var person = persons?.FirstOrDefault(x => x.PersonId == id);
 
       return person == null ? NotFound() : Ok(person);
     }
@@ -32,7 +31,7 @@ namespace TestAPI.Controllers
     [HttpPut("{id}")]
     public async Task<IActionResult> PutPerson(string id, PersonRequest person)
     {
-      if (GetPerson(id) == null) return BadRequest();
+      if ((await GetPerson(id)).Result is NotFoundResult) return NotFound();
 
       var result = await _client.PutAsJsonAsync($"{_url}/v1.0/persons/{id}/update", person);
 
@@ -42,6 +41,7 @@ namespace TestAPI.Controllers
     [HttpPost]
     public async Task<ActionResult<Person>> PostPerson(PersonRequest person)
     {
+      // TODO: Ensure model matches Exos!
       var createdPerson = new Person
       {
         PersonId = Guid.NewGuid().ToString(),
@@ -52,15 +52,6 @@ namespace TestAPI.Controllers
         PinCode = person.PinCode
       };
 
-      /// <summary>
-      /// This is what you get back from Exos.
-      /// {
-      ///   Value: {  
-      ///     "PersonId": "string"
-      ///   },
-      ///   "TimeElapsed": 2319
-      /// }
-      /// </summary>
       var response = await _client.PostAsJsonAsync($"{_url}/v1.0/persons/create", createdPerson);
 
       if (!response.IsSuccessStatusCode)
@@ -81,7 +72,7 @@ namespace TestAPI.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePerson(string id)
     {
-      if (GetPerson(id) == null) return NotFound();
+      if ((await GetPerson(id)).Result is NotFoundResult) return BadRequest();
 
       var response = await _client.PostAsync($"{_url}/v1.0/persons/{id}/delete", null);
 
