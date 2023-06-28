@@ -10,6 +10,15 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+builder.Services.AddHttpClient("ExosClientDev").ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+            {
+              ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; },
+              // UseDefaultCredentials = false,
+              // Credentials = System.Net.CredentialCache.DefaultCredentials,
+              // AllowAutoRedirect = true
+            });
 
 var app = builder.Build();
 

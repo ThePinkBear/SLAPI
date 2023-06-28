@@ -22,7 +22,7 @@ namespace TestAPI.Controllers
     {
       var persons = await _client.GetFromJsonAsync<List<Person>>($"{_url}/v1.0/persons");
 
-      var person = persons?.FirstOrDefault(x => x.PersonId == id);
+      var person = persons?.FirstOrDefault(x => x.PrimaryId == id);
 
       return person == null ? NotFound() : Ok(person);
     }
@@ -45,7 +45,7 @@ namespace TestAPI.Controllers
       var createdPerson = new Person
       {
         PersonId = Guid.NewGuid().ToString(),
-        PrimaryId = person.PrimaryId,
+        PrimaryId = person.PrimaryId, // Personal Number supplied by SL.
         FirstName = person.FirstName,
         LastName = person.LastName,
         Department = person.Department,
