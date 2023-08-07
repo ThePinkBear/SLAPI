@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Test.Models;
-using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -12,9 +11,7 @@ namespace TestAPI.Controllers
   {
     private readonly HttpClient _client;
     private readonly string? _url;
-    private string _credentials;
-    public string username = "MyApiKey";
-    public string password = "1efa7cd3-cf3a-469c-c088-45fc71eacec8";
+    private readonly string _credentials;
 
     public AccessPointsController(IHttpClientFactory client, IConfiguration config)
     {
@@ -23,22 +20,47 @@ namespace TestAPI.Controllers
       _credentials = Convert.ToBase64String
       (
         Encoding.ASCII
-        //.GetBytes($"{config.GetValue<string>("ExosUsername")}:{config.GetValue<string>("ExosPassword")}")
-        .GetBytes($"{username}:{password}")
+        .GetBytes($"{config.GetValue<string>("User:Name")}:{config.GetValue<string>("User:Password")}")
       );
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAccessPoints()
+    public async Task<ActionResult<List<AccessPointResponse>>> GetAccessPoints(string? accessPointId)
     {
       _client.DefaultRequestHeaders.Authorization = new System.Net.Http
               .Headers.AuthenticationHeaderValue("Basic", _credentials);
-      var response = await _client.GetAsync($"{_url}/v1.0/accessRights");
+      var response = await _client.GetAsync($"{_url}/sysops/v1.0/peripheryStatusList");
       var responseContent = await response.Content.ReadAsStringAsync();
 
-      var accessPoints = JsonConvert.DeserializeObject<List<AccessPoint>>(responseContent);
+      var accessPoints = 
+        from accesspoint in JsonConvert.DeserializeObject<List<AccessPoint>>(responseContent) select new AccessPointResponse
+        {
+          AccessPointId = accesspoint.AccessPointId,
+          Address = accesspoint.Address,
+          Description = accesspoint.AccessPointId
+        };
+      if (accessPointId != null) return accessPoints
+                                            .Where(x => x.AccessPointId == accessPointId)
+                                            .Select(x => x).FirstOrDefault() == null 
+                                                    ? NotFound() 
+                                                    : Ok(accessPoints
+                                                              .Where(x => x.AccessPointId == accessPointId)
+                                                              .Select(x => x).FirstOrDefault());
 
       return accessPoints == null ? NotFound() : Ok(accessPoints);
+    }
+
+    [HttpPut("{accessPointId} {command}")]
+    public async Task<IActionResult> PutAccessPoint(string accessPointId, string command)
+    {
+      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
+              .Headers.AuthenticationHeaderValue("Basic", _credentials);
+      
+      if ((await GetAccessPoints(accessPointId)).Result is NotFoundResult) return BadRequest();
+      // TODO: Check if a time parameter needs to be added, IE keep open for 3 sek.
+      var response = await _client.PostAsync($"{_url}/sysops/v1.0/periphery/{accessPointId}/{command}", null);
+
+      return !response.IsSuccessStatusCode ? StatusCode(500) : NoContent();
     }
   }
 }
