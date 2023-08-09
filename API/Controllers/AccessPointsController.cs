@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Test.Models;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace TestAPI.Controllers
 {
@@ -29,38 +30,42 @@ namespace TestAPI.Controllers
     {
       _client.DefaultRequestHeaders.Authorization = new System.Net.Http
               .Headers.AuthenticationHeaderValue("Basic", _credentials);
-      var response = await _client.GetAsync($"{_url}/sysops/v1.0/peripheryStatusList");
-      var responseContent = await response.Content.ReadAsStringAsync();
+            var response = await _client.GetAsync($"{_url}/sysops/v1.0/peripheryStatusList?componentType=Online&skip=0&take=50&orderBy=DeviceAddressAscending&filterDevicesWithAlarm=false");
+            var responseContent = await response.Content.ReadAsStringAsync();
 
-      var accessPoints = 
-        from accesspoint in JsonConvert.DeserializeObject<List<AccessPoint>>(responseContent) select new AccessPointResponse
-        {
-          AccessPointId = accesspoint.AccessPointId,
-          Address = accesspoint.Address,
-          Description = accesspoint.AccessPointId
-        };
-      if (accessPointId != null) return accessPoints
-                                            .Where(x => x.AccessPointId == accessPointId)
-                                            .Select(x => x).FirstOrDefault() == null 
-                                                    ? NotFound() 
-                                                    : Ok(accessPoints
-                                                              .Where(x => x.AccessPointId == accessPointId)
-                                                              .Select(x => x).FirstOrDefault());
+            JObject devices = JObject.Parse(responseContent);
+            var argument = JObject.Parse(responseContent);
 
-      return accessPoints == null ? NotFound() : Ok(accessPoints);
-    }
+            var accessPoints =
+              from accesspoint in JsonConvert.DeserializeObject<List<AccessPoint>>(argument["Value"]["Devices"].ToString())
+              select new AccessPointResponse
+              {
+                  AccessPointId = accesspoint.AccessPointId,
+                  Address = accesspoint.Address,
+                  Description = accesspoint.AccessPointId
+              };
+            if (accessPointId != null) return accessPoints
+                                                  .Where(x => x.AccessPointId == accessPointId)
+                                                  .Select(x => x).FirstOrDefault() == null
+                                                          ? NotFound()
+                                                          : Ok(accessPoints
+                                                                    .Where(x => x.AccessPointId == accessPointId)
+                                                                    .Select(x => x).FirstOrDefault());
 
-    [HttpPut("{accessPointId} {command}")]
-    public async Task<IActionResult> PutAccessPoint(string accessPointId, string command)
-    {
-      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
-              .Headers.AuthenticationHeaderValue("Basic", _credentials);
+            return accessPoints == null ? NotFound() : Ok(accessPoints);
+        }
+
+    //[HttpPut("{accessPointId} {command}")]
+    //public async Task<IActionResult> PutAccessPoint(string accessPointId, string command)
+    //{
+    //  _client.DefaultRequestHeaders.Authorization = new System.Net.Http
+    //          .Headers.AuthenticationHeaderValue("Basic", _credentials);
       
-      if ((await GetAccessPoints(accessPointId)).Result is NotFoundResult) return BadRequest();
-      // TODO: Check if a time parameter needs to be added, IE keep open for 3 sek.
-      var response = await _client.PostAsync($"{_url}/sysops/v1.0/periphery/{accessPointId}/{command}", null);
+    //  if ((await GetAccessPoints(accessPointId)).Result is NotFoundResult) return BadRequest();
+    //  // TODO: Check if a time parameter needs to be added, IE keep open for 3 sek.
+    //  var response = await _client.PostAsync($"{_url}/sysops/v1.0/periphery/{accessPointId}/{command}", null);
 
-      return !response.IsSuccessStatusCode ? StatusCode(500) : NoContent();
-    }
+    //  return !response.IsSuccessStatusCode ? StatusCode(500) : NoContent();
+    //}
   }
 }
