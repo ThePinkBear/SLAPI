@@ -1,48 +1,49 @@
-// using Microsoft.AspNetCore.Mvc;
-// using Microsoft.EntityFrameworkCore;
-// using Test.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Test.Models;
 
-// namespace TestAPI.Controllers
-// {
-//   [Route("api/[controller]")]
-//   [ApiController]
-//   public class AccessRightsController : ControllerBase
-//   {
-//     private readonly HttpClient _client;
-//     private readonly string? _url;
+namespace TestAPI.Controllers
+{
+  [Route("api/[controller]")]
+  [ApiController]
+  public class AccessRightsController : ControllerBase
+  {
+    private readonly HttpClient _client;
+    private readonly string? _apiUrl;
+    private readonly string? _accessRightUrl;
 
-//     public AccessRightsController(HttpClient client, IConfiguration config)
-//     {
-//       _client = client;
-//       _url = config.GetValue<string>("ExosUrl");
-//     }
+    public AccessRightsController(HttpClient client, IConfiguration config)
+    {
+      _client = client;
+      _apiUrl = config.GetValue<string>("ExosUrl");
+      _accessRightUrl = config.GetValue<string>("Url:AccessRights");
+    }
 
-//     [HttpGet("{id}")]
-//     public async Task<ActionResult<AccessRight>> GetAccessRight(string id)
-//     {
-//       var accessRights = await _client.GetFromJsonAsync<List<AccessRight>>($"{_url}/v1.0/accessrights");
+    [HttpGet("{id}")]
+    public async Task<ActionResult<AccessRight>> GetAccessRight(string id)
+    {
+      var accessRights = await _client.GetFromJsonAsync<List<AccessRight>>($"{_apiUrl}{_accessRightUrl}");
 
-//       var accessRight = accessRights == null ? null : accessRights.FirstOrDefault(x => x.PersonPrimaryId == id);
+      var accessRight = accessRights?.FirstOrDefault(x => x.PersonPrimaryId == id);
 
-//       return accessRight == null ? NotFound() : accessRight;
-//     }
+      return accessRight == null ? NotFound() : accessRight;
+    }
     
-//     [HttpPost]
-//     public Task<ActionResult<Person>> AssignAccessRight(AccessRightCreateRequest accessRight)
-//     {
-//       throw new NotImplementedException();
-
-//       // TODO: Assign Accessright here??.
-//       // var newAccessRight = new AccessRight
-//       // {
-//       //   BadgeId = accessRight.BadgeId,
-//       //   BadgeName = accessRight.BadgeName,
-//       //   PersonPrimaryId = accessRight.PersonPrimaryId
-//       // };
+    [HttpPost]
+    public async Task<ActionResult<Person>> AssignAccessRight(AccessRightCreateRequest accessRight)
+    {
+      // TODO: Assign Accessright here??.
+      var newAccessRight = new AccessRight
+      {
+        BadgeId = accessRight.BadgeId,
+        BadgeName = accessRight.BadgeName,
+        PersonPrimaryId = accessRight.PersonPrimaryId
+      };
     
-//       // var createdAccessRight = await _client.PostAsJsonAsync($"{_url}/v1.0/accessrights/create", newAccessRight);
+      var response = await _client.PostAsJsonAsync($"{_apiUrl}{_accessRightUrl}/create", newAccessRight);
 
-//       // return CreatedAtAction("GetAccessRight", new { id = accessRight.PersonPrimaryId }, createdAccessRight);
-//     }
-//   }
-// }
+      return !response.IsSuccessStatusCode ? StatusCode(500) : NoContent();
+      // return CreatedAtAction("GetAccessRight", new { id = accessRight.PersonPrimaryId }, createdAccessRight);
+    }
+  }
+}
