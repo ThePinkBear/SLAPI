@@ -10,10 +10,12 @@ namespace TestAPI.Controllers
   {
     private readonly HttpClient _client;
     private readonly string? _url;
+    private readonly string? _cardUrl;
 
 
     public CardsController(HttpClient client, IConfiguration config)
     {
+      _cardUrl = config.GetValue<string>("Url:Card");
       _client = client;
       _url = config.GetValue<string>("ExosUrl");
     }
@@ -21,9 +23,10 @@ namespace TestAPI.Controllers
     [HttpGet("{id}")]
     public async Task<ActionResult<Badge>> GetCard(string id)
     {
-      var badges = await _client.GetFromJsonAsync<List<Badge>>($"{_url}/v1.0/badges");
+      //TODO: Ensure Class Badge is compatible with response from exos, otherwise see accesspointController for reference.
+      var badges = await _client.GetFromJsonAsync<List<Badge>>($"{_url}{_cardUrl}");
 
-      var badge = badges == null ? null : badges.FirstOrDefault(x => x.BadgeId == id);
+      var badge = badges?.FirstOrDefault(x => x.BadgeId == id);
 
       return badge == null ? NotFound() : badge;
     }
@@ -39,15 +42,13 @@ namespace TestAPI.Controllers
       };
       var createdBadge = await _client.PostAsJsonAsync($"{_url}/v1.0/badges/create", newBadge);
 
-      //TODO: Do some verification with createdBadge.
-
-      return CreatedAtAction("GetPerson", new { id = newBadge.PersonPrimaryId }, newBadge);
+      return CreatedAtAction("GetCard", new { id = newBadge.PersonPrimaryId }, createdBadge);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCard(string id)
     {
-      var deletedBadge = await _client.DeleteAsync($"{_url}/v1.0/badges/{id}/delete");
+      _ = await _client.DeleteAsync($"{_url}/v1.0/badges/{id}/delete");
       return NoContent();
     }
   }

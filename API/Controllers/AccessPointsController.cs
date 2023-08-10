@@ -36,7 +36,7 @@ namespace TestAPI.Controllers
       var devices = JObject.Parse(responseContent);
 
       var accessPoints =
-        from accesspoint in JsonConvert.DeserializeObject<List<AccessPoint>>(devices["Value"]["Devices"].ToString())
+        from accesspoint in JsonConvert.DeserializeObject<List<AccessPoint>>(devices["Value"]!["Devices"]!.ToString())
         select new AccessPointResponse
         {
             AccessPointId = accesspoint.AccessPointId,
@@ -65,7 +65,7 @@ namespace TestAPI.Controllers
              .Headers.AuthenticationHeaderValue("Basic", _credentials);
       
      if ((await GetAccessPoints(accessPointId)).Result is NotFoundResult) return BadRequest();
-     
+
      var response = await _client.PostAsync($"{_url}/sysops/v1.0/periphery/{accessPointId}/{command}", null);
 
      return !response.IsSuccessStatusCode ? StatusCode(500) : NoContent();

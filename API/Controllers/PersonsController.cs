@@ -10,17 +10,19 @@ namespace TestAPI.Controllers
   {
     private readonly HttpClient _client;
     private readonly string? _url;
+    private readonly string? _personUrl;
 
     public PersonsController(HttpClient client, IConfiguration config)
     {
       _client = client;
       _url = config.GetValue<string>("ExosUrl");
+      _personUrl = config.GetValue<string>("Url:Person");
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Person>> GetPerson(string id)
     {
-      var persons = await _client.GetFromJsonAsync<List<Person>>($"{_url}/v1.0/persons");
+      var persons = await _client.GetFromJsonAsync<List<Person>>($"{_url}{_personUrl}");
 
       var person = persons?.FirstOrDefault(x => x.PrimaryId == id);
 
@@ -66,7 +68,7 @@ namespace TestAPI.Controllers
         };
       }
 
-      return CreatedAtRoute("GetPerson", new { id = createdPerson.PrimaryId }, person);
+      return CreatedAtRoute("GetPerson", new { id = createdPerson.PrimaryId }, createdPerson);
     }
 
     [HttpDelete("{id}")]
