@@ -39,6 +39,9 @@ namespace TestAPI.Controllers
     [HttpPut("{id}")]
     public async Task<IActionResult> PutPerson(string id, PersonRequest person)
     {
+      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
+             .Headers.AuthenticationHeaderValue("Basic", _credentials);
+
       if ((await GetPerson(id)).Result is NotFoundResult) return NotFound();
 
       var result = await _client.PutAsJsonAsync($"{_url}/v1.0/persons/{id}/update", person);
@@ -49,6 +52,8 @@ namespace TestAPI.Controllers
     [HttpPost]
     public async Task<ActionResult<Person>> PostPerson(PersonRequest person)
     {
+      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
+             .Headers.AuthenticationHeaderValue("Basic", _credentials);
       // TODO: Ensure model matches Exos!
       var createdPerson = new Person
       {
@@ -80,6 +85,9 @@ namespace TestAPI.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePerson(string id)
     {
+      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
+             .Headers.AuthenticationHeaderValue("Basic", _credentials);
+             
       if ((await GetPerson(id)).Result is NotFoundResult) return BadRequest();
 
       var response = await _client.PostAsync($"{_url}/v1.0/persons/{id}/delete", null);
