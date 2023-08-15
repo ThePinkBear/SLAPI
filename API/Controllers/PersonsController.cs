@@ -11,17 +11,23 @@ namespace TestAPI.Controllers
     private readonly HttpClient _client;
     private readonly string? _url;
     private readonly string? _personUrl;
+    private readonly string? _credentials;
 
     public PersonsController(HttpClient client, IConfiguration config)
     {
+      var c = new Credentials(config);
       _client = client;
       _url = config.GetValue<string>("ExosUrl");
       _personUrl = config.GetValue<string>("Url:Person");
+      _credentials = c.Value;
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Person>> GetPerson(string id)
+    public async Task<ActionResult<List<Person>>> GetPerson(string id)
     {
+      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
+             .Headers.AuthenticationHeaderValue("Basic", _credentials);
+
       var persons = await _client.GetFromJsonAsync<List<Person>>($"{_url}{_personUrl}");
 
       var person = persons?.FirstOrDefault(x => x.PrimaryId == id);

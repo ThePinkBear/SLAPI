@@ -12,6 +12,7 @@ namespace TestAPI.Controllers
   {
     private readonly HttpClient _client;
     private readonly string? _url;
+    private readonly string? _accessPointUrl;
     private readonly string _credentials;
 
     public AccessPointsController(IHttpClientFactory client, IConfiguration config)
@@ -19,6 +20,7 @@ namespace TestAPI.Controllers
       var c = new Credentials(config);
       _client = client.CreateClient("ExosClientDev");
       _url = config.GetValue<string>("ExosUrl");
+      _accessPointUrl = config.GetValue<string>("Url:AccessPoint");
       _credentials = c.Value;
     }
 
@@ -27,7 +29,7 @@ namespace TestAPI.Controllers
     {
       _client.DefaultRequestHeaders.Authorization = new System.Net.Http
               .Headers.AuthenticationHeaderValue("Basic", _credentials);
-            var response = await _client.GetAsync($"{_url}/sysops/v1.0/peripheryStatusList?componentType=Online&skip=0&take=50&orderBy=DeviceAddressAscending&filterDevicesWithAlarm=false");
+            var response = await _client.GetAsync($"{_url}{_accessPointUrl}");
             var responseContent = await response.Content.ReadAsStringAsync();
 
             JObject devices = JObject.Parse(responseContent);
