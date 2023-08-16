@@ -39,7 +39,7 @@ namespace TestAPI.Controllers
               from accesspoint in JsonConvert.DeserializeObject<List<AccessPoint>>(argument["Value"]!["Devices"]!.ToString())
               select new AccessPointResponse
               {
-                  AccessPointId = accesspoint.AccessPointId,
+                  AccessPointId = accesspoint.Id,
                   Address = accesspoint.Address,
                   Description = accesspoint.AccessPointId
               };
@@ -54,17 +54,17 @@ namespace TestAPI.Controllers
             return accessPoints == null ? NotFound() : Ok(accessPoints);
         }
 
-    [HttpPut("{accessPointId} {command}")]
-    public async Task<IActionResult> PutAccessPoint(string accessPointId, string command)
+    [HttpPut("{id} {command}")]
+    public async Task<IActionResult> PutAccessPoint(string id, string command)
     {
      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
              .Headers.AuthenticationHeaderValue("Basic", _credentials);
       
-     if ((await GetAccessPoints(accessPointId)).Result is NotFoundResult) return BadRequest();
+     if ((await GetAccessPoints(id)).Result is NotFoundResult) return BadRequest("No such access point");
      
-     var response = await _client.PostAsync($"{_url}/sysops/v1.0/periphery/{accessPointId}/{command}", null);
+     var response = await _client.PostAsync($"{_url}/sysops/v1.0/{id}/command/{command}/", null);
 
-     return !response.IsSuccessStatusCode ? StatusCode(500) : NoContent();
+     return response.IsSuccessStatusCode ? NoContent() : StatusCode(500);
     }
   }
 }
