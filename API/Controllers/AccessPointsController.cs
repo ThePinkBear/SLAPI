@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Test.Models;
-using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Test.Models;
 
 namespace TestAPI.Controllers
 {
@@ -29,30 +28,29 @@ namespace TestAPI.Controllers
     {
       _client.DefaultRequestHeaders.Authorization = new System.Net.Http
               .Headers.AuthenticationHeaderValue("Basic", _credentials);
-            var response = await _client.GetAsync($"{_url}{_accessPointUrl}");
-            var responseContent = await response.Content.ReadAsStringAsync();
 
-            JObject devices = JObject.Parse(responseContent);
-            var argument = JObject.Parse(responseContent);
+      var response = await _client.GetAsync($"{_url}{_accessPointUrl}");
+      var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
+      var devices = JsonConvert.DeserializeObject<List<AccessPoint>>(objectResult["Value"]["Devices"].ToString());
+      
+      var accessPoints = 
+        from accesspoint in devices
+        select new AccessPointResponse
+        {
+            AccessPointId = accesspoint.Id,
+            Address = accesspoint.Address,
+            Description = accesspoint.AccessPointId
+        };
+      if (accessPointId != null) return accessPoints
+                                            .Where(x => x.AccessPointId == accessPointId)
+                                            .Select(x => x).FirstOrDefault() == null
+                                                ? NotFound()
+                                                : Ok(accessPoints
+                                                      .Where(x => x.AccessPointId == accessPointId)
+                                                      .Select(x => x).FirstOrDefault());
 
-            var accessPoints =
-              from accesspoint in JsonConvert.DeserializeObject<List<AccessPoint>>(argument["Value"]!["Devices"]!.ToString())
-              select new AccessPointResponse
-              {
-                  AccessPointId = accesspoint.Id,
-                  Address = accesspoint.Address,
-                  Description = accesspoint.AccessPointId
-              };
-            if (accessPointId != null) return accessPoints
-                                                  .Where(x => x.AccessPointId == accessPointId)
-                                                  .Select(x => x).FirstOrDefault() == null
-                                                          ? NotFound()
-                                                          : Ok(accessPoints
-                                                                    .Where(x => x.AccessPointId == accessPointId)
-                                                                    .Select(x => x).FirstOrDefault());
-
-            return accessPoints == null ? NotFound() : Ok(accessPoints);
-        }
+      return accessPoints == null ? NotFound() : Ok(accessPoints);
+    }
 
     [HttpPut("{id} {command}")]
     public async Task<IActionResult> PutAccessPoint(string id, string command)
