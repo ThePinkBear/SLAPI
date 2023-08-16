@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Test.Models;
 
 namespace TestAPI.Controllers
@@ -21,17 +23,18 @@ namespace TestAPI.Controllers
       _credentials = c.Value;
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Badge>> GetCard(string id)
+    [HttpGet(/*"{id}"*/)]
+    public async Task<ActionResult<List<Badge>>> GetCard(/*string id*/)
     {
       _client.DefaultRequestHeaders.Authorization = new System.Net.Http
               .Headers.AuthenticationHeaderValue("Basic", _credentials);
-      //TODO: Ensure Class Badge is compatible with response from exos, otherwise see accesspointController for reference.
-      var badges = await _client.GetFromJsonAsync<List<Badge>>($"{_url}{_cardUrl}");
+    
+      var response = await _client.GetAsync($"{_url}{_cardUrl}");
+      var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
+      var cards = JsonConvert.DeserializeObject<List<Badge>>(objectResult["value"]!.ToString());
+      // var badge = response?.FirstOrDefault(x => x.BadgeId == id);
 
-      var badge = badges?.FirstOrDefault(x => x.BadgeId == id);
-
-      return badge == null ? NotFound() : badge;
+      return cards == null ? NotFound() : Ok(cards);
     }
 
     [HttpPost]
@@ -43,11 +46,13 @@ namespace TestAPI.Controllers
       {
         BadgeId = Guid.NewGuid().ToString(),
         BadgeName = badge.BadgeName,
-        PersonPrimaryId = badge.PersonPrimaryId
+        // PersonPrimaryId = badge.PersonPrimaryId
       };
       var createdBadge = await _client.PostAsJsonAsync($"{_url}/v1.0/badges/create", newBadge);
 
-      return CreatedAtAction("GetCard", new { id = newBadge.PersonPrimaryId }, createdBadge);
+      return Ok(createdBadge);
+
+      // return CreatedAtAction("GetCard", new { id = newBadge.PersonPrimaryId }, createdBadge);
     }
 
     [HttpDelete("{id}")]
