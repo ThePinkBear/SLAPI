@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Test.Models;
 
 namespace TestAPI.Controllers
@@ -11,18 +10,22 @@ namespace TestAPI.Controllers
     private readonly HttpClient _client;
     private readonly string? _url;
     private readonly string? _cardUrl;
+    private readonly string _credentials;
 
-
-    public CardsController(HttpClient client, IConfiguration config)
+    public CardsController(IHttpClientFactory client, IConfiguration config)
     {
+      var c = new Credentials(config);
       _cardUrl = config.GetValue<string>("Url:Card");
-      _client = client;
+      _client = client.CreateClient("ExosClientDev");
       _url = config.GetValue<string>("ExosUrl");
+      _credentials = c.Value;
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Badge>> GetCard(string id)
     {
+      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
+              .Headers.AuthenticationHeaderValue("Basic", _credentials);
       //TODO: Ensure Class Badge is compatible with response from exos, otherwise see accesspointController for reference.
       var badges = await _client.GetFromJsonAsync<List<Badge>>($"{_url}{_cardUrl}");
 
@@ -34,6 +37,8 @@ namespace TestAPI.Controllers
     [HttpPost]
     public async Task<ActionResult<Badge>> CreateCard(BadgeCreateRequest badge)
     {
+      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
+              .Headers.AuthenticationHeaderValue("Basic", _credentials);
       var newBadge = new Badge
       {
         BadgeId = Guid.NewGuid().ToString(),
@@ -48,6 +53,9 @@ namespace TestAPI.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCard(string id)
     {
+      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
+              .Headers.AuthenticationHeaderValue("Basic", _credentials);
+  
       _ = await _client.DeleteAsync($"{_url}/v1.0/badges/{id}/delete");
       return NoContent();
     }
