@@ -1,6 +1,4 @@
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Test.Models;
 
 namespace TestAPI.Controllers
