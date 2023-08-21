@@ -4,7 +4,7 @@ using Microsoft.Win32;
 public class Credentials
 {
   public string Value { get; set; } ="";
-  RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Exos", true);
+  RegistryKey? key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Exos", true);
   
   public Credentials(IConfiguration config)
   {
@@ -12,7 +12,7 @@ public class Credentials
       (
         Encoding.ASCII
         // .GetBytes($"{config.GetValue<string>("User:Name")}:{config.GetValue<string>("User:Password")}")
-        .GetBytes($"{config.GetValue<string>("User:Name")}:{key.GetValue("Password")}")
+        .GetBytes($"{config.GetValue<string>("User:Name")}:{key?.GetValue("Password")}")
       );
   }
 }
