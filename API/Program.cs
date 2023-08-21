@@ -12,19 +12,29 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddHttpClient("ExosClientDev").ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
-            {
-              ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; },
-              // UseDefaultCredentials = false,
-              // Credentials = System.Net.CredentialCache.DefaultCredentials,
-              // AllowAutoRedirect = true
-            });
+{
+  ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; },
+  // UseDefaultCredentials = false,
+  // Credentials = System.Net.CredentialCache.DefaultCredentials,
+  // AllowAutoRedirect = true
+});
 
 var app = builder.Build();
 
+// app.Use(async (context, next) =>
+// {
+//   context.Response.OnStarting(() =>
+//   {
+//     return Task.FromResult(0);
+//   });
+//   await next(context);
+
+// });
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+  app.UseSwagger();
+  app.UseSwaggerUI();
 }
 
 
