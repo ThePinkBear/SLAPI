@@ -25,7 +25,7 @@ namespace TestAPI.Controllers
     {
       var response = await _client.GetAsync($"{_url}{_accessPointUrl}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
-      var devices = JsonConvert.DeserializeObject<List<AccessPoint>>(objectResult["Value"]["Devices"].ToString());
+      var devices = JsonConvert.DeserializeObject<List<AccessPoint>>(objectResult["Value"]!["Devices"]!.ToString());
       
       var accessPoints = 
         from accesspoint in devices
@@ -53,7 +53,7 @@ namespace TestAPI.Controllers
      
      var response = await _client.PostAsync($"{_url}/sysops/v1.0/{id}/command/{command}/", null);
 
-     return response.IsSuccessStatusCode ? NoContent() : StatusCode(500);
+     return response.IsSuccessStatusCode ? NoContent() : BadRequest();
     }
   }
 }
