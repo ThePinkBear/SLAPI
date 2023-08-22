@@ -10,7 +10,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddHttpClient("ExosClientDev", c =>
 {
-  c.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ExosUrl"));
+  c.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ExosUrl")!);
   c.DefaultRequestHeaders.Add("Accept", "application/json");
   c.DefaultRequestHeaders.Add("Authorization", $"Basic {new Credentials().Value}");
 }).ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
