@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Test.Models;
 
-namespace TestAPI.Controllers
+namespace SLAPI.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
