@@ -1,11 +1,11 @@
-public class Interceptor
+public class AuthInterceptor
 {
   private readonly RequestDelegate _next;
   public readonly string _key;
   public readonly HttpClient _client;
-  public Interceptor(RequestDelegate next, IConfiguration config)
+  public AuthInterceptor(RequestDelegate next)
   {
-    var c = new Credentials(config);
+    var c = new Credentials();
     _client = new HttpClient();
     _next = next;
     _key = c.Value;

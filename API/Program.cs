@@ -3,15 +3,18 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
-builder.Services.AddDbContext<PersonsContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("PersonsContext") ?? throw new InvalidOperationException("Connection string 'PersonsContext' not found.")));
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-builder.Services.AddHttpClient("ExosClientDev").ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
+builder.Services.AddHttpClient("ExosClientDev", c =>
+{
+  c.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ExosUrl"));
+  c.DefaultRequestHeaders.Add("Accept", "application/json");
+  c.DefaultRequestHeaders.Add("User-Agent", "HttpClientFactory-Sample");
+  c.DefaultRequestHeaders.Add("Authorization", $"Basic {new Credentials().Value}");
+}).ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
 {
   ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; },
   // UseDefaultCredentials = false,
@@ -21,27 +24,14 @@ builder.Services.AddHttpClient("ExosClientDev").ConfigurePrimaryHttpMessageHandl
 
 var app = builder.Build();
 
-// app.Use(async (context, next) =>
-// {
-//   context.Response.OnStarting(() =>
-//   {
-//     return Task.FromResult(0);
-//   });
-//   await next(context);
-
-// });
-
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
   app.UseSwaggerUI();
 }
 
-
-
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
-// app.UseMiddleware<Interceptor>();
 
 app.Run();

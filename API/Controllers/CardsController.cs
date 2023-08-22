@@ -12,23 +12,17 @@ namespace TestAPI.Controllers
     private readonly HttpClient _client;
     private readonly string? _url;
     private readonly string? _cardUrl;
-    private readonly string _credentials;
 
     public CardsController(IHttpClientFactory client, IConfiguration config)
     {
-      var c = new Credentials(config);
       _cardUrl = config.GetValue<string>("Url:Card");
       _client = client.CreateClient("ExosClientDev");
       _url = config.GetValue<string>("ExosUrl");
-      _credentials = c.Value;
     }
 
     [HttpGet(/*"{id}"*/)]
     public async Task<ActionResult<List<Badge>>> GetCard(/*string id*/)
     {
-      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
-              .Headers.AuthenticationHeaderValue("Basic", _credentials);
-    
       var response = await _client.GetAsync($"{_url}{_cardUrl}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
       var cards = JsonConvert.DeserializeObject<List<Badge>>(objectResult["value"]!.ToString());
@@ -40,8 +34,6 @@ namespace TestAPI.Controllers
     [HttpPost]
     public async Task<ActionResult<Badge>> CreateCard(BadgeCreateRequest badge)
     {
-      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
-              .Headers.AuthenticationHeaderValue("Basic", _credentials);
       var newBadge = new Badge
       {
         BadgeId = Guid.NewGuid().ToString(),
@@ -58,9 +50,6 @@ namespace TestAPI.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCard(string id)
     {
-      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
-              .Headers.AuthenticationHeaderValue("Basic", _credentials);
-  
       _ = await _client.DeleteAsync($"{_url}/v1.0/badges/{id}/delete");
       return NoContent();
     }

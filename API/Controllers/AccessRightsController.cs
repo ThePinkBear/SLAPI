@@ -10,23 +10,17 @@ namespace TestAPI.Controllers
     private readonly HttpClient _client;
     private readonly string? _apiUrl;
     private readonly string? _accessRightUrl;
-    private readonly string _credentials;
 
     public AccessRightsController(HttpClient client, IConfiguration config)
     {
-      var c = new Credentials(config);
       _client = client;
       _apiUrl = config.GetValue<string>("ExosUrl");
       _accessRightUrl = config.GetValue<string>("Url:AccessRights");
-      _credentials = c.Value;
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<AccessRight>> GetAccessRight(string id)
     {
-      _client.DefaultRequestHeaders.Authorization = 
-        new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", _credentials);
-
       var accessRights = 
         await _client.GetFromJsonAsync<List<AccessRight>>($"{_apiUrl}{_accessRightUrl}");
 

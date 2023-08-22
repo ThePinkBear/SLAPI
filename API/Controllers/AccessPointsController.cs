@@ -12,23 +12,17 @@ namespace TestAPI.Controllers
     private readonly HttpClient _client;
     private readonly string? _url;
     private readonly string? _accessPointUrl;
-    private readonly string _credentials;
 
     public AccessPointsController(IHttpClientFactory client, IConfiguration config)
     {
-      var c = new Credentials(config);
       _client = client.CreateClient("ExosClientDev");
       _url = config.GetValue<string>("ExosUrl");
       _accessPointUrl = config.GetValue<string>("Url:AccessPoint");
-      _credentials = c.Value;
     }
 
     [HttpGet]
     public async Task<ActionResult<List<AccessPointResponse>>> GetAccessPoints(string? accessPointId)
     {
-      _client.DefaultRequestHeaders.Authorization = new System.Net.Http
-              .Headers.AuthenticationHeaderValue("Basic", _credentials);
-
       var response = await _client.GetAsync($"{_url}{_accessPointUrl}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
       var devices = JsonConvert.DeserializeObject<List<AccessPoint>>(objectResult["Value"]["Devices"].ToString());
@@ -55,9 +49,6 @@ namespace TestAPI.Controllers
     [HttpPut("{id} {command}")]
     public async Task<IActionResult> PutAccessPoint(string id, string command)
     {
-     _client.DefaultRequestHeaders.Authorization = new System.Net.Http
-             .Headers.AuthenticationHeaderValue("Basic", _credentials);
-      
      if ((await GetAccessPoints(id)).Result is NotFoundResult) return BadRequest("No such access point");
      
      var response = await _client.PostAsync($"{_url}/sysops/v1.0/{id}/command/{command}/", null);
