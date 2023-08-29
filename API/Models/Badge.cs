@@ -1,9 +1,11 @@
+using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
 namespace Test.Models;
 
 public class Badge
 {
+    [Key]
     public string BadgeId { get; set; } = default!;
     [JsonProperty("BadgeName")]
     public string BadgeName { get; set; } = default!;

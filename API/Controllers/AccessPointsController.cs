@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using Test.Models;
-using System.Text.Json;
 
 namespace SLAPI.Controllers
 {
@@ -46,6 +45,7 @@ namespace SLAPI.Controllers
                           ? NotFound()
                           : Ok(result);                                        
       }
+      
       return accessPointResponses == null ? NotFound() : Ok(accessPointResponses);
     }
 

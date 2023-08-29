@@ -29,7 +29,7 @@ namespace SLAPI.Controllers
     }
     
     [HttpPost]
-    public async Task<ActionResult<Person>> AssignAccessRight(AccessRightCreateRequest accessRight)
+    public async Task<ActionResult<Person>> AssignAccessRight(AccessRightRequest accessRight)
     {
       var newAccessRight = new AccessRight
       {

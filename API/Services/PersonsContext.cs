@@ -5,9 +5,9 @@ public class PersonsContext : DbContext
 {
   public PersonsContext(DbContextOptions<PersonsContext> options) : base(options) { }
 
-  public DbSet<Person> Persons { get; set; } = default!;
-  public DbSet<AccessPoint> AccessPoints { get; set; } = default!;
-  public DbSet<Badge> Badges { get; set; } = default!;
-  public DbSet<AccessRight> AccessRights { get; set; } = default!;
-  public DbSet<Schedule> Schedules { get; set; } = default!;
+  public DbSet<PersonDbObject> Persons { get; set; } = default!;
+  public DbSet<AccessPointDbObject> AccessPoints { get; set; } = default!;
+  public DbSet<CardDbObject> Badges { get; set; } = default!;
+  public DbSet<AccessRightDbObject> AccessRights { get; set; } = default!;
+  public DbSet<ScheduleDbObject> Schedules { get; set; } = default!;
 }

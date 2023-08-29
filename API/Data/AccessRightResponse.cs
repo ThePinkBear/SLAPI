@@ -2,11 +2,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Test.Models;
 
-public class AccessRight
+public class AccessRightResponse
 {
+    [Required]
     public string BadgeName { get; set; } = default!;
-    [Key]
+    [Required]
     public string PersonPrimaryId { get; set; } = default!;
-    public string BadgeId { get; set; } = default!;
-    public string TimeZoneIdInternal { get; set; } = default!; // Relationship with Schedule?
+    [Required]
+    public string TimeZoneId { get; set; } = default!;
 }

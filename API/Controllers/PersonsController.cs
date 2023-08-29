@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Test.Models;
-using System.Net;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using Test.Models;
 
 namespace SLAPI.Controllers
 {
@@ -14,15 +13,15 @@ namespace SLAPI.Controllers
     private readonly string? _url;
     private readonly string? _personUrl;
 
-    public PersonsController(HttpClient client, IConfiguration config)
+    public PersonsController(IHttpClientFactory client, IConfiguration config)
     {
-      _client = client;
+      _client = client.CreateClient("ExosClientDev");
       _url = config.GetValue<string>("ExosUrl");
       _personUrl = config.GetValue<string>("Url:Person");
     }
 
-    [HttpGet(/*"{id}"*/)]
-    public async Task<ActionResult<List<PersonResponse>>> GetPerson(string? personId)
+    [HttpGet]
+    public async Task<ActionResult<List<PersonDbObject>>> GetPerson(string? personId)
     {
       var response = await _client.GetAsync($"{_url}{_personUrl}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
@@ -30,12 +29,11 @@ namespace SLAPI.Controllers
 
       var personResponse =
         from person in people
-        select new PersonResponse
+        select new PersonDbObject
         {
-          PersonId = person.PersonId,
           PrimaryId = person.PrimaryId,
-          // FirstName = person.FirstName,
-          // LastName = person.LastName
+          FirstName = person.FirstName,
+          LastName = person.LastName
         };
 
       if (!String.IsNullOrEmpty(personId))

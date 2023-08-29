@@ -33,7 +33,7 @@ namespace SLAPI.Controllers
     }
 
     [HttpPost]
-    public async Task<ActionResult<Badge>> CreateCard(BadgeCreateRequest badge)
+    public async Task<ActionResult<Badge>> CreateCard(BadgeRequest badge)
     {
 
       // TODO What Id is created by exos and can that be retrieved from return of created or is a separate Get call needed and if so, with what searchparameter?

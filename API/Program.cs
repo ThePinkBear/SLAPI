@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
@@ -14,6 +16,10 @@ builder.Services.AddHttpClient("ExosClientDev", c =>
 }).ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
 {
   ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
+});
+builder.Services.AddDbContext<PersonsContext>(options =>
+{
+  options.UseSqlServer(builder.Configuration.GetConnectionString("Exos"));
 });
 
 var app = builder.Build();
