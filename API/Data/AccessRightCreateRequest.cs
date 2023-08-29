@@ -9,5 +9,5 @@ public class AccessRightCreateRequest
     [Required]
     public string PersonPrimaryId { get; set; } = default!;
     [Required]
-    public string BadgeId { get; set; } = default!;
+    public string TimeZoneId { get; set; } = default!;
 }

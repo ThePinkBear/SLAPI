@@ -21,8 +21,7 @@ namespace SLAPI.Controllers
     [HttpGet("{id}")]
     public async Task<ActionResult<AccessRight>> GetAccessRight(string id)
     {
-      var accessRights = 
-        await _client.GetFromJsonAsync<List<AccessRight>>($"{_apiUrl}{_accessRightUrl}");
+      var accessRights = await _client.GetFromJsonAsync<List<AccessRight>>($"{_apiUrl}{_accessRightUrl}");
 
       var accessRight = accessRights?.FirstOrDefault(x => x.PersonPrimaryId == id);
 
@@ -32,10 +31,9 @@ namespace SLAPI.Controllers
     [HttpPost]
     public async Task<ActionResult<Person>> AssignAccessRight(AccessRightCreateRequest accessRight)
     {
-      // TODO: Assign Accessright here??.
       var newAccessRight = new AccessRight
       {
-        BadgeId = accessRight.BadgeId,
+        BadgeId = accessRight.TimeZoneId,
         BadgeName = accessRight.BadgeName,
         PersonPrimaryId = accessRight.PersonPrimaryId
       };
@@ -43,7 +41,6 @@ namespace SLAPI.Controllers
       var response = await _client.PostAsJsonAsync($"{_apiUrl}{_accessRightUrl}/create", newAccessRight);
 
       return !response.IsSuccessStatusCode ? StatusCode(500) : NoContent();
-      // return CreatedAtAction("GetAccessRight", new { id = accessRight.PersonPrimaryId }, createdAccessRight);
     }
   }
 }

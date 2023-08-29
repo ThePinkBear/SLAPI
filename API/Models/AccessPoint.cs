@@ -5,7 +5,6 @@ namespace Test.Models;
 
 public class AccessPoint
 {
-  [Key]
   [JsonProperty("Id")]
   public string Id { get; set; } = default!;
   [JsonProperty("Name")]

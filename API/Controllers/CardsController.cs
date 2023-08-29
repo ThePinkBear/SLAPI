@@ -20,25 +20,28 @@ namespace SLAPI.Controllers
       _url = config.GetValue<string>("ExosUrl");
     }
 
-    [HttpGet(/*"{id}"*/)]
-    public async Task<ActionResult<List<Badge>>> GetCard(/*string id*/)
+    [HttpGet("{id}")]
+    public async Task<ActionResult<List<Badge>>> GetCard(string id)
     {
       var response = await _client.GetAsync($"{_url}{_cardUrl}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
-      var cards = JsonConvert.DeserializeObject<List<Badge>>(objectResult["value"]!.ToString());
-      // var badge = response?.FirstOrDefault(x => x.BadgeId == id);
+      var card = JsonConvert.DeserializeObject<List<Badge>>(objectResult["value"]!
+        .ToString())?
+        .FirstOrDefault(x => x.BadgeIdInternal == id);
 
-      return cards == null ? NotFound() : Ok(cards);
+      return card == null ? NotFound() : Ok(card);
     }
 
     [HttpPost]
     public async Task<ActionResult<Badge>> CreateCard(BadgeCreateRequest badge)
     {
+
+      // TODO What Id is created by exos and can that be retrieved from return of created or is a separate Get call needed and if so, with what searchparameter?
       var newBadge = new Badge
       {
         BadgeId = Guid.NewGuid().ToString(),
         BadgeName = badge.BadgeName,
-        // PersonPrimaryId = badge.PersonPrimaryId
+        PersonPrimaryId = badge.PersonPrimaryId
       };
       var createdBadge = await _client.PostAsJsonAsync($"{_url}/v1.0/badges/create", newBadge);
 
