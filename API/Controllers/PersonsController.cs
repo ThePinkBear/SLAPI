@@ -21,7 +21,7 @@ namespace SLAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<PersonDbObject>>> GetPerson(string? personId)
+    public async Task<ActionResult<List<PersonResponse>>> GetPerson(string? personId)
     {
       var response = await _client.GetAsync($"{_url}{_personUrl}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
@@ -29,21 +29,22 @@ namespace SLAPI.Controllers
 
       var personResponse =
         from person in people
-        select new PersonDbObject
+        select new PersonResponse
         {
+          PersonId = person.PersonId,
           PrimaryId = person.PrimaryId,
           FirstName = person.FirstName,
           LastName = person.LastName
         };
 
       if (!String.IsNullOrEmpty(personId))
-      { 
-        // var result = personResponse
-        //                 .Where(x => x.PersonId == personId)
-        //                 .Select(x => x).FirstOrDefault();
-        // return result == null 
-        //                   ? NotFound()
-        //                   : Ok(result);                                        
+      {
+        var personMatch = personResponse
+                        .Where(x => x.PrimaryId == personId)
+                        .Select(x => x).FirstOrDefault();
+        return personMatch == null
+                          ? NotFound()
+                          : Ok(personMatch);
       }
 
       return personResponse == null ? NotFound() : Ok(personResponse);
@@ -60,36 +61,30 @@ namespace SLAPI.Controllers
     //   return !result.IsSuccessStatusCode ? StatusCode(500) : NoContent() ;
     // }
 
-    // [HttpPost]
-    // public async Task<ActionResult<Person>> PostPerson(PersonRequest person)
-    // {
-    //   // TODO: Ensure model matches Exos!
-    //   var createdPerson = new Person
-    //   {
-    //     PersonId = Guid.NewGuid().ToString(),
-    //     PrimaryId = person.PrimaryId, // Personal Number supplied by SL.
-    //     FirstName = person.FirstName,
-    //     LastName = person.LastName,
-    //     Department = person.Department,
-    //     PinCode = person.PinCode
-    //   };
+    [HttpPost]
+    public async Task<ActionResult<ExosPerson>> PostPerson(PersonRequest person)
+    {
+      var createdPerson = new Person
+      {
+        PersonId = new Random().Next(1 ,99).ToString(),/*Guid.NewGuid().ToString(),*/
+        PrimaryId = person.PrimaryId, // Personal Number supplied by SL.
+        FirstName = person.FirstName,
+        LastName = person.LastName,
+        // Department = person.Department,
+        // PinCode = person.PinCode
+      };
+      var exosPerson = new ExosPerson
+      {
+        PersonCategory  = 1,
+        PersonBaseData = createdPerson
+      };
 
-    //   var response = await _client.PostAsJsonAsync($"{_url}/v1.0/persons/create", createdPerson);
+      var response = await _client.PostAsJsonAsync($"{_url}/api/v1.0/persons/create", exosPerson);
 
-    //   if (!response.IsSuccessStatusCode)
-    //   {
-    //     return response.StatusCode switch
-    //     {
-    //       HttpStatusCode.BadRequest => BadRequest(),
-    //       HttpStatusCode.Unauthorized => Unauthorized(),
-    //       HttpStatusCode.Forbidden => Forbid(),
-    //       HttpStatusCode.NotFound => NotFound(),
-    //       _ => StatusCode(500)
-    //     };
-    //   }
+      if (!response.IsSuccessStatusCode) return Ok(exosPerson);
+      return StatusCode(409, exosPerson);
+    }
 
-    //   return CreatedAtRoute("GetPerson", new { id = createdPerson.PrimaryId }, createdPerson);
-    // }
 
     // [HttpDelete("{id}")]
     // public async Task<IActionResult> DeletePerson(string id)
