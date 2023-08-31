@@ -28,7 +28,7 @@ namespace SLAPI.Controllers
       var response = await _client.GetAsync($"{_url}{_personUrl}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
       var people = JsonConvert.DeserializeObject<List<Person>>(objectResult["value"]!.ToString());
-      var person = people?.FirstOrDefault(x => x.PrimaryId == personId);
+      var person = people?.Where(x => x.PrimaryId == personId);
 
 
       if (!String.IsNullOrEmpty(personId))

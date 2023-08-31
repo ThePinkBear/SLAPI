@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Test.Models;
 
 namespace SLAPI.Controllers
@@ -11,36 +13,45 @@ namespace SLAPI.Controllers
     private readonly string? _apiUrl;
     private readonly string? _accessRightUrl;
 
-    public AccessRightsController(HttpClient client, IConfiguration config)
+    public AccessRightsController(IHttpClientFactory client, IConfiguration config)
     {
-      _client = client;
+      _client = client.CreateClient("ExosClientDev");
       _apiUrl = config.GetValue<string>("ExosUrl");
       _accessRightUrl = config.GetValue<string>("Url:AccessRights");
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<AccessRight>> GetAccessRight(string id)
+    [HttpGet]
+    public async Task<ActionResult<AccessRightResponse>> GetAccessRight()
     {
-      var accessRights = await _client.GetFromJsonAsync<List<AccessRight>>($"{_apiUrl}{_accessRightUrl}");
+      var response = await _client.GetAsync($"{_apiUrl}{_accessRightUrl}");
+      var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
+      var accessRights = JsonConvert.DeserializeObject<List<AccessRight>>(objectResult["value"]!.ToString());
 
-      var accessRight = accessRights?.FirstOrDefault(x => x.PersonPrimaryId == id);
+      var accessRightResponse =
+        from ar in accessRights
+        select new AccessRightResponse
+        {
+          BadgeId = ar.BadgeId,
+          TimeZoneId = ar.TimeZoneIdInternal,
+          PersonPrimaryId = ar.PersonPrimaryId
+        };
 
-      return accessRight == null ? NotFound() : accessRight;
+      return accessRightResponse == null ? NotFound() : Ok(accessRightResponse);
     }
     
-    [HttpPost]
-    public async Task<ActionResult<Person>> AssignAccessRight(AccessRightRequest accessRight)
-    {
-      var newAccessRight = new AccessRight
-      {
-        BadgeId = accessRight.TimeZoneId,
-        BadgeName = accessRight.BadgeName,
-        PersonPrimaryId = accessRight.PersonPrimaryId
-      };
+    // [HttpPost]
+    // public async Task<ActionResult<Person>> AssignAccessRight(AccessRightRequest accessRight)
+    // {
+    //   var newAccessRight = new AccessRight
+    //   {
+    //     BadgeId = accessRight.TimeZoneId,
+    //     BadgeName = accessRight.BadgeName,
+    //     PersonPrimaryId = accessRight.PersonPrimaryId
+    //   };
     
-      var response = await _client.PostAsJsonAsync($"{_apiUrl}{_accessRightUrl}/create", newAccessRight);
+    //   var response = await _client.PostAsJsonAsync($"{_apiUrl}{_accessRightUrl}/create", newAccessRight);
 
-      return !response.IsSuccessStatusCode ? StatusCode(500) : NoContent();
-    }
+    //   return !response.IsSuccessStatusCode ? StatusCode(500) : NoContent();
+    // }
   }
 }

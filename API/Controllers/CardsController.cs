@@ -20,16 +20,34 @@ namespace SLAPI.Controllers
       _url = config.GetValue<string>("ExosUrl");
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<List<Badge>>> GetCard(string id)
+    [HttpGet]
+    public async Task<ActionResult<List<Badge>>> GetCard(string? badgeId)
     {
       var response = await _client.GetAsync($"{_url}{_cardUrl}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
       var card = JsonConvert.DeserializeObject<List<Badge>>(objectResult["value"]!
-        .ToString())?
-        .FirstOrDefault(x => x.BadgeIdInternal == id);
+        .ToString());
 
-      return card == null ? NotFound() : Ok(card);
+      var cardResponse =
+        from c in card
+        select new Badge
+        {
+          BadgeId = c.BadgeId,
+          BadgeName = c.BadgeName,
+          PersonPrimaryId = c.PersonPrimaryId
+        };
+
+      if (!String.IsNullOrEmpty(badgeId))
+      {
+        var result = cardResponse
+                        .Where(x => x.BadgeName == badgeId)
+                        .Select(x => x).FirstOrDefault();
+        return result == null
+                          ? NotFound()
+                          : Ok(result);
+      }
+
+      return cardResponse == null ? NotFound() : Ok(cardResponse);
     }
 
     [HttpPost]
