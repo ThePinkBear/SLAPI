@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Test.Models;
+using System.Linq;
 
 namespace SLAPI.Controllers
 {
@@ -11,37 +12,38 @@ namespace SLAPI.Controllers
   {
     private readonly HttpClient _client;
     private readonly string? _url;
-    private readonly string? _personUrl;
+    private readonly string? _personUrl1;
+    private readonly string? _personUrl2;
 
     public PersonController(IHttpClientFactory client, IConfiguration config)
     {
       _client = client.CreateClient("ExosClientDev");
       _url = config.GetValue<string>("ExosUrl");
-      _personUrl = config.GetValue<string>("Url:Person");
+      _personUrl1 = config.GetValue<string>("Url:rPersonStart");
+      _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<AccessRightResponse>>> GetPerson(string? personId)
+    public async Task<ActionResult<List<AccessRightResponse>>> GetPerson(string personId)
     {
       // todo Make sure r/person can use this to get a list of access rights for a person
 
-      var response = await _client.GetAsync($"{_url}{_personUrl}");
+      var response = await _client.GetAsync($"{_url}{_personUrl1}{personId}{_personUrl2}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
-      var people = JsonConvert.DeserializeObject<List<Person>>(objectResult["value"]!.ToString());
-      var person = people?.Where(x => x.PrimaryId == personId);
+      var person = JsonConvert.DeserializeObject<ExosPerson>(objectResult["value"]![0]!.ToString());
 
+      var result = new List<AccessRightResponse>();
 
-      if (!String.IsNullOrEmpty(personId))
-      { 
-        // var result = personResponse
-        //                 .Where(x => x.PersonId == personId)
-        //                 .Select(x => x).FirstOrDefault();
-        // return result == null 
-        //                   ? NotFound()
-        //                   : Ok(result);                                        
-      }
-
-      return Ok();
+      if (person == null) return NotFound();
+      result.AddRange(from accessRight in person.PersonAccessControlData.accessRights
+                      select new AccessRightResponse()
+                      {
+                        AccessPointId = accessRight.BadgeId,
+                        PersonPrimaryId = accessRight.BadgeName,
+                        ScheduleId = accessRight.TimeZoneIdInternal
+                      });
+                      
+      return Ok(result);
     }
 
 

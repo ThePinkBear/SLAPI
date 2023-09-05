@@ -75,7 +75,6 @@ namespace SLAPI.Controllers
       };
       var exosPerson = new ExosPerson
       {
-        PersonCategory  = 1,
         PersonBaseData = createdPerson
       };
 
@@ -86,14 +85,14 @@ namespace SLAPI.Controllers
     }
 
 
-    // [HttpDelete("{id}")]
-    // public async Task<IActionResult> DeletePerson(string id)
-    // {
-    //   if ((await GetPerson(id)).Result is NotFoundResult) return BadRequest();
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeletePerson(string id)
+    {
+      if ((await GetPerson(id)).Result is NotFoundResult) return BadRequest();
 
-    //   var response = await _client.PostAsync($"{_url}/v1.0/persons/{id}/delete", null);
+      var response = await _client.PostAsync($"{_url}/v1.0/persons/{id}/delete", null);
 
-    //   return response.IsSuccessStatusCode ? NoContent() : StatusCode(500);
-    // }
+      return response.IsSuccessStatusCode ? NoContent() : StatusCode(500);
+    }
   }
 }

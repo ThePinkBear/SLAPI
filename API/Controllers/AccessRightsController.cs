@@ -31,8 +31,8 @@ namespace SLAPI.Controllers
         from ar in accessRights
         select new AccessRightResponse
         {
-          BadgeId = ar.BadgeId,
-          TimeZoneId = ar.TimeZoneIdInternal,
+          AccessPointId = ar.BadgeId,
+          ScheduleId = ar.TimeZoneIdInternal,
           PersonPrimaryId = ar.PersonPrimaryId
         };
 
