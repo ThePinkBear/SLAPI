@@ -26,23 +26,29 @@ namespace SLAPI.Controllers
     [HttpGet]
     public async Task<ActionResult<List<AccessRightResponse>>> GetPerson(string personId)
     {
-      // todo Make sure r/person can use this to get a list of access rights for a person
-
       var response = await _client.GetAsync($"{_url}{_personUrl1}{personId}{_personUrl2}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
-      var person = JsonConvert.DeserializeObject<ExosPerson>(objectResult["value"]![0]!.ToString());
-
       var result = new List<AccessRightResponse>();
-
-      if (person == null) return NotFound();
-      result.AddRange(from accessRight in person.PersonAccessControlData.accessRights
-                      select new AccessRightResponse()
-                      {
-                        AccessPointId = accessRight.BadgeId,
-                        PersonPrimaryId = accessRight.BadgeName,
-                        ScheduleId = accessRight.TimeZoneIdInternal
-                      });
-                      
+      try
+      {
+        var person = JsonConvert.DeserializeObject<ExosPerson>(objectResult["value"]![0]!.ToString());
+        if (person == null) return NotFound();
+        result.AddRange(from accessRight in person.PersonAccessControlData.accessRights
+                        select new AccessRightResponse()
+                        {
+                          AccessPointId = accessRight.BadgeId,
+                          PersonPrimaryId = accessRight.BadgeName,
+                          ScheduleId = accessRight.TimeZoneIdInternal
+                        });
+      }
+      catch (ArgumentOutOfRangeException)
+      {
+        return NotFound("No such person");
+      }
+      catch (Exception e)
+      {
+        return BadRequest(e.Message);
+      }
       return Ok(result);
     }
 
