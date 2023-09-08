@@ -1,18 +1,19 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 
 namespace Test.Models;
 
 public class Person
 {
-  [JsonProperty("PersonIdInternal")]
   [Key]
+  [JsonPropertyName("PersonId")]
   public string PersonId { get; set; } = default!;
-  [JsonProperty("TenantId")]
-  public string PrimaryId { get; set; } = default!;
-  [JsonProperty("FirstName")]
+  [JsonPropertyName("PersonalNumber")]
+  public string PersonalNumber { get; set; } = default!;
+  [JsonPropertyName("FirstName")]
   public string FirstName { get; set; } = default!;
-  [JsonProperty("LastName")]
+  [JsonPropertyName("LastName")]
   public string LastName { get; set; } = default!;
   // [JsonProperty("DepartmentFk")]
   // public string Department { get; set; } = default!;

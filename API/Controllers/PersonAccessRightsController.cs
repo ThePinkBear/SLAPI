@@ -24,9 +24,9 @@ namespace SLAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<AccessRightResponse>>> GetPerson(string personId)
+    public async Task<ActionResult<List<AccessRightResponse>>> GetPerson(string personalNumber)
     {
-      var response = await _client.GetAsync($"{_url}{_personUrl1}{personId}{_personUrl2}");
+      var response = await _client.GetAsync($"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
       var person = new ExosPerson();
       try
@@ -35,7 +35,7 @@ namespace SLAPI.Controllers
       }
       catch (ArgumentOutOfRangeException)
       {
-        return NotFound($"No person with this Id: {personId} found");
+        return NotFound($"No person with this Id: {personalNumber} found");
       }
 
       var result = new List<AccessRightResponse>();

@@ -5,18 +5,16 @@ namespace Test.Models;
 
 public class PersonResponse
 {
-  [JsonProperty("PersonIdInternal")]
+  [JsonProperty("PersonalNumber")]
   [Key]
-  public string PersonId { get; set; } = default!;
+  public string PersonalNumber { get; set; } = default!;
 
-  [JsonProperty("TenantId")]
-  public string PrimaryId { get; set; } = default!;
   [JsonProperty("FirstName")]
   public string FirstName { get; set; } = default!;
   [JsonProperty("LastName")]
   public string LastName { get; set; } = default!;
   [JsonProperty("DepartmentFk")]
   public string Department { get; set; } = default!;
-  [JsonProperty("Info")]
+  [JsonProperty("PinCode")]
   public string PinCode { get; set; } = default!;
 }

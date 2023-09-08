@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Test.Models;
+using System.Net.Http.Headers;
 
 namespace SLAPI.Controllers
 {
@@ -11,41 +12,30 @@ namespace SLAPI.Controllers
   {
     private readonly HttpClient _client;
     private readonly string? _url;
-    private readonly string? _personUrl;
+    private readonly string? _personUrl1;
+    private readonly string? _personUrl2;
 
     public PersonsController(IHttpClientFactory client, IConfiguration config)
     {
       _client = client.CreateClient("ExosClientDev");
       _url = config.GetValue<string>("ExosUrl");
-      _personUrl = config.GetValue<string>("Url:Person");
+      _personUrl1 = config.GetValue<string>("Url:rPersonStart");
+      _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<PersonResponse>>> GetPerson(string? personId)
+    public async Task<ActionResult<List<PersonResponse>>> GetPerson(string? personalNumber)
     {
-      var response = await _client.GetAsync($"{_url}{_personUrl}");
+      var response = await _client.GetAsync($"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
-      var people = JsonConvert.DeserializeObject<List<Person>>(objectResult["value"]!.ToString());
+      var person = JsonConvert.DeserializeObject<Person>(objectResult["value"]![0].ToString());
 
-      var personResponse =
-        from person in people
-        select new PersonResponse
-        {
-          PersonId = person.PersonId,
-          PrimaryId = person.PrimaryId,
-          FirstName = person.FirstName,
-          LastName = person.LastName
-        };
-
-      if (!String.IsNullOrEmpty(personId))
+      var personResponse = new PersonResponse
       {
-        var personMatch = personResponse
-                        .Where(x => x.PrimaryId == personId)
-                        .Select(x => x).FirstOrDefault();
-        return personMatch == null
-                          ? NotFound()
-                          : Ok(personMatch);
-      }
+        PersonalNumber = person.PersonalNumber,
+        FirstName = person.FirstName,
+        LastName = person.LastName
+      };
 
       return personResponse == null ? NotFound() : Ok(personResponse);
     }
@@ -66,22 +56,26 @@ namespace SLAPI.Controllers
     {
       var createdPerson = new Person
       {
-        PersonId = new Random().Next(1 ,99).ToString(),/*Guid.NewGuid().ToString(),*/
-        PrimaryId = person.PrimaryId, // Personal Number supplied by SL.
+        PersonId = Guid.NewGuid().ToString(),
+        PersonalNumber = person.PersonalNumber, // Personal Number supplied by SL.
         FirstName = person.FirstName,
         LastName = person.LastName,
         // Department = person.Department,
         // PinCode = person.PinCode
       };
-      var exosPerson = new ExosPerson
+      var exosPerson = new ExosPersonResponse
       {
         PersonBaseData = createdPerson
       };
+      var myContent = JsonConvert.SerializeObject(exosPerson);
+      var buffer = System.Text.Encoding.UTF8.GetBytes(myContent);
+      var byteContent = new ByteArrayContent(buffer);
+      byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-      var response = await _client.PostAsJsonAsync($"{_url}/api/v1.0/persons/create", exosPerson);
+      await _client.PostAsync($"{_url}/api/v1.0/persons/create", byteContent);
 
-      if (!response.IsSuccessStatusCode) return Ok(exosPerson);
-      return StatusCode(409, exosPerson);
+      return Ok(exosPerson);
+  
     }
 
 
