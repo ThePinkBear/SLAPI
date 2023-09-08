@@ -28,28 +28,27 @@ namespace SLAPI.Controllers
     {
       var response = await _client.GetAsync($"{_url}{_personUrl1}{personId}{_personUrl2}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
-      var result = new List<AccessRightResponse>();
+      var person = new ExosPerson();
       try
       {
-        var person = JsonConvert.DeserializeObject<ExosPerson>(objectResult["value"]![0]!.ToString());
-        if (person == null) return NotFound();
-        result.AddRange(from accessRight in person.PersonAccessControlData.accessRights
+        person = JsonConvert.DeserializeObject<ExosPerson>(objectResult["value"]![0]!.ToString());
+      }
+      catch (ArgumentOutOfRangeException)
+      {
+        return NotFound($"No person with this Id: {personId} found");
+      }
+
+      var result = new List<AccessRightResponse>();
+    
+        result.AddRange(from accessRight in person?.PersonAccessControlData.accessRights
                         select new AccessRightResponse()
                         {
                           AccessPointId = accessRight.BadgeId,
                           PersonPrimaryId = accessRight.BadgeName,
                           ScheduleId = accessRight.TimeZoneIdInternal
                         });
-      }
-      catch (ArgumentOutOfRangeException)
-      {
-        return NotFound("No such person");
-      }
-      catch (Exception e)
-      {
-        return BadRequest(e.Message);
-      }
-      return Ok(result);
+      
+      return Ok(result); // TODO Check if empty array or 404 as return for no accessrights found
     }
 
 
