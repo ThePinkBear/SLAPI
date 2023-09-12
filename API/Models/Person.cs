@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using Newtonsoft.Json;
 
 namespace Test.Models;
 
@@ -15,9 +14,9 @@ public class Person
   public string FirstName { get; set; } = default!;
   [JsonPropertyName("LastName")]
   public string LastName { get; set; } = default!;
-  // [JsonProperty("DepartmentFk")]
+  // [JsonPropertyName("DepartmentFk")]
   // public string Department { get; set; } = default!;
-  // [JsonProperty("PinCode")]
+  // [JsonPropertyName("PinCode")]
   // public string PinCode { get; set; } = default!;
   // public List<Badge>? Badges { get; set; }
   // public List<AccessRight>? AccessRights { get; set; }

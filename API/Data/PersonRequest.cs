@@ -6,7 +6,6 @@ namespace Test.Models;
 public class PersonRequest
 {
     [Required]
-    [JsonProperty("PersonalNumber")]
     public string PersonalNumber { get; set; } = default!;
     [Required]
     public string FirstName { get; set; } = default!;
