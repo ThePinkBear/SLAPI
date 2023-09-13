@@ -51,7 +51,7 @@ namespace SLAPI.Controllers
     }
 
 
-    [HttpPut("{personalNumber}")]
+    [HttpPut]
     public async Task<IActionResult> PutPerson(string personalNumber, PersonRequest person)
     {
       var personToEdit = await GetPerson(personalNumber);
@@ -59,7 +59,7 @@ namespace SLAPI.Controllers
 
       var result = ((OkObjectResult)personToEdit.Result!).Value as PersonResponse;
 
-      var UpdatedPerson = new ExosPerson
+      var UpdatedPerson = new ExosPersonResponse
       {
         PersonBaseData = new Person
         {
@@ -76,9 +76,15 @@ namespace SLAPI.Controllers
       var byteContent = new ByteArrayContent(buffer);
       byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-      var updateResult = await _client.PostAsync($"{_url}/v1.0/persons/{result!.PersonId}/update?ignoreBlacklist=true", byteContent);
-
-      return !updateResult.IsSuccessStatusCode ? StatusCode(500) : NoContent() ;
+      try
+      {
+        await _client.PostAsync($"{_url}/api/v1.0/persons/{result!.PersonId}/update?ignoreBlacklist=false", byteContent);
+        return NoContent();
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(409, ex.Message);
+      }
     }
 
     [HttpPost]

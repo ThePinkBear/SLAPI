@@ -1,0 +1,11 @@
+{
+  "BadgeName": "987654",
+  "MediaDefinitionFk": 1,
+  "MediaRoleAuthorisation": "All",
+  "ApplicationDefinitions": [
+    {
+      "BadgeNumber": "987654",
+      "ApplicationDefinitionFk": 1
+    }
+  ]
+}
