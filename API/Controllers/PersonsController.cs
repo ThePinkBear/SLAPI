@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Test.Models;
-using System.Net.Http.Headers;
+using static ByteContent;
 
 namespace SLAPI.Controllers
 {
@@ -71,14 +71,10 @@ namespace SLAPI.Controllers
           // PinCode = person.PinCode
         }
       };
-      var myContent = JsonConvert.SerializeObject(UpdatedPerson);
-      var buffer = System.Text.Encoding.UTF8.GetBytes(myContent);
-      var byteContent = new ByteArrayContent(buffer);
-      byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
       try
       {
-        await _client.PostAsync($"{_url}/api/v1.0/persons/{result!.PersonId}/update?ignoreBlacklist=false", byteContent);
+        await _client.PostAsync($"{_url}/api/v1.0/persons/{result!.PersonId}/update?ignoreBlacklist=false", ByteMaker(UpdatedPerson));
         return NoContent();
       }
       catch (Exception ex)
@@ -103,14 +99,16 @@ namespace SLAPI.Controllers
       {
         PersonBaseData = createdPerson
       };
-      var myContent = JsonConvert.SerializeObject(exosPerson);
-      var buffer = System.Text.Encoding.UTF8.GetBytes(myContent);
-      var byteContent = new ByteArrayContent(buffer);
-      byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+      try
+      {
+        await _client.PostAsync($"{_url}/api/v1.0/persons/create", ByteMaker(exosPerson));
 
-      await _client.PostAsync($"{_url}/api/v1.0/persons/create", byteContent);
-
-      return Ok(exosPerson);
+        return Ok(exosPerson);
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, ex.Message);
+      }
 
     }
 

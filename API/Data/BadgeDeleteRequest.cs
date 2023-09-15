@@ -3,8 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Test.Models;
 
-public class BadgeRequest
-{
-  [Required]
-  public string BadgeName { get; set; } = default!;
-}
+internal class BadgeDeleteRequest
+  {
+    public string BadgeName { get; set; } = default!;
+  }
