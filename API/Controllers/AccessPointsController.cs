@@ -9,6 +9,7 @@ namespace SLAPI.Controllers
   [ApiController]
   public class AccessPointsController : ControllerBase
   {
+    private readonly ExosService _exosService;
     private readonly HttpClient _client;
     private readonly string? _url;
     private readonly string? _accessPointUrl;
@@ -18,14 +19,13 @@ namespace SLAPI.Controllers
       _client = client.CreateClient("ExosClientDev");
       _url = config.GetValue<string>("ExosUrl");
       _accessPointUrl = config.GetValue<string>("Url:AccessPoint");
+      _exosService = new ExosService();
     }
 
     [HttpGet]
     public async Task<ActionResult<List<AccessPointResponse>>> GetAccessPoints(string? accessPointId)
     {
-      var response = await _client.GetAsync($"{_url}{_accessPointUrl}");
-      var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
-      var devices = JsonConvert.DeserializeObject<List<AccessPoint>>(objectResult["Value"]!["Devices"]!.ToString());
+      var devices = await _exosService.GetExos<AccessPoint>(_client, $"{_url}{_accessPointUrl}", "Value", "Devices");
 
       var accessPointResponses =
         from accesspoint in devices
@@ -53,7 +53,7 @@ namespace SLAPI.Controllers
     public async Task<IActionResult> PutAccessPoint(string id, string command)
     {
       if ((await GetAccessPoints(id)).Result is NotFoundResult) return BadRequest("No such access point");
-      if (command.ToLower() is ("open"))
+      if (command.ToLower() is "open")
       {
         var response = await _client.PostAsync($"{_url}/sysops/v1.0/{id}/command/ReleaseOnce/", null);
         return response.IsSuccessStatusCode ? NoContent() : BadRequest();

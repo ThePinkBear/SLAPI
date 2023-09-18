@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Test.Models;
-using static ByteContent;
+using static ByteContentService;
 
 namespace SLAPI.Controllers
 {
@@ -10,6 +10,7 @@ namespace SLAPI.Controllers
   [ApiController]
   public class PersonsController : ControllerBase
   {
+    private readonly ExosService _exosService;
     private readonly HttpClient _client;
     private readonly string? _url;
     private readonly string? _personUrl1;
@@ -23,13 +24,13 @@ namespace SLAPI.Controllers
       _personUrl1 = config.GetValue<string>("Url:rPersonStart");
       _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
       _deleteUrl = config.GetValue<string>("Url:DeletePerson");
+      _exosService = new ExosService();
     }
 
     [HttpGet]
     public async Task<ActionResult<PersonResponse>> GetPerson(string personalNumber)
     {
-      var response = await _client.GetAsync($"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
-      var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
+      var objectResult = await _exosService.GetExos(_client, $"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
 
       try
       {

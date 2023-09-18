@@ -10,9 +10,8 @@ builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddHttpClient("ExosClientDev", c =>
 {
-  c.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ExosUrl")!);
   c.DefaultRequestHeaders.Add("Accept", "application/json");
-  c.DefaultRequestHeaders.Add("Authorization", $"Basic {new Credentials().Value}");
+  c.DefaultRequestHeaders.Add("Authorization", $"Basic {new CredentialsService().Value}");
 }).ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
 {
   ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }

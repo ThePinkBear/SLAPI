@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
 
-public static class ByteContent
+public static class ByteContentService
 {
   public static ByteArrayContent ByteMaker<T>(T epr)
   {

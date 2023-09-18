@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Test.Models;
-using static ByteContent;
+using static ByteContentService;
 
 namespace SLAPI.Controllers
 {
@@ -14,6 +14,7 @@ namespace SLAPI.Controllers
     private readonly string? _url;
     private readonly string? _cardUrl1;
     private readonly string? _cardUrl2;
+    private readonly ExosService _exosService;
 
     public CardsController(IHttpClientFactory client, IConfiguration config)
     {
@@ -21,20 +22,20 @@ namespace SLAPI.Controllers
       _cardUrl2 = config.GetValue<string>("Url:GetBadgeEnd");
       _client = client.CreateClient("ExosClientDev");
       _url = config.GetValue<string>("ExosUrl");
+      _exosService = new ExosService();
     }
 
     [HttpGet]
     public async Task<ActionResult<List<BadgeResponse>>> GetCard(string? badgeName)
     {
-      var response = await _client.GetAsync($"{_url}{_cardUrl1}{badgeName}{_cardUrl2}");
-      var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
-      var cards = JsonConvert.DeserializeObject<List<Badge>>(objectResult["value"]!.ToString());
+      var cards = await _exosService.GetExos<Badge>(_client, $"{_url}{_cardUrl1}{badgeName}{_cardUrl2}", "value");
 
-      var cardResponse = from card in cards select new BadgeResponse
-        {
-          BadgeName = card!.BadgeName
-          //PersonPrimaryId = card.Person.PersonalNumber
-        };
+      var cardResponse = from card in cards
+                         select new BadgeResponse
+                         {
+                           BadgeName = card!.BadgeName
+                           //PersonPrimaryId = card.Person.PersonalNumber
+                         };
 
 
       return Ok(cardResponse);
@@ -47,19 +48,24 @@ namespace SLAPI.Controllers
       {
         BadgeName = badge.BadgeName,
         MediaDefinitionFk = 1,
-        MediaRoleAuthorisation = "All",
         ApplicationDefinitions = new List<ApplicationDefinition>
         {
           new ApplicationDefinition
           {
-            BadgeNumber = new Random().Next(2147483647).ToString(),
+            BadgeNumber = badge.BadgeName,
             ApplicationDefinitionFk = 1
           }
         }
       };
-      await _client.PostAsync($"{_url}/api/v1.0/badges/create", ByteMaker(newBadge));
-
-      return NoContent();
+      try
+      {
+        await _client.PostAsync($"{_url}/api/v1.0/badges/create", ByteMaker(newBadge));
+        return NoContent();
+      }
+      catch (Exception)
+      {
+        return BadRequest();
+      }
     }
 
     [HttpDelete]
