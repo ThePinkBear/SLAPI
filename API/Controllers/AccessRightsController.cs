@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Test.Models;
+using static ByteContentService;
+
 
 namespace SLAPI.Controllers
 {
@@ -10,48 +12,43 @@ namespace SLAPI.Controllers
   public class AccessRightsController : ControllerBase
   {
     private readonly HttpClient _client;
-    private readonly string? _apiUrl;
-    private readonly string? _accessRightUrl;
+    private readonly string? _url;
+    private readonly string? _accessRightUrl1;
+    private readonly string? _accessRightUrl2;
+    private readonly string? _personUrl1;
+    private readonly string? _personUrl2;
+    private readonly ExosRepository _exosService;
 
     public AccessRightsController(IHttpClientFactory client, IConfiguration config)
     {
       _client = client.CreateClient("ExosClientDev");
-      _apiUrl = config.GetValue<string>("ExosUrl");
-      _accessRightUrl = config.GetValue<string>("Url:AccessRights");
+      _url = config.GetValue<string>("ExosUrl");
+      _accessRightUrl1 = config.GetValue<string>("Url:AssignAccessRightStart");
+      _accessRightUrl2 = config.GetValue<string>("Url:AssignAccessRightEnd");
+      _exosService = new ExosRepository();
+      _personUrl1 = config.GetValue<string>("Url:rPersonStart");
+      _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
     }
 
-    [HttpGet]
-    public async Task<ActionResult<AccessRightResponse>> GetAccessRight()
+    [HttpPost("{personalNumber}")]
+    public async Task<ActionResult> AssignAccessRight(string personalNumber, AccessRightRequest accessRight)
     {
-      var response = await _client.GetAsync($"{_apiUrl}{_accessRightUrl}");
-      var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
-      var accessRights = JsonConvert.DeserializeObject<List<AccessRight>>(objectResult["value"]!.ToString());
-
-      var accessRightResponse =
-        from ar in accessRights
-        select new AccessRightResponse
-        {
-          AccessPointId = ar.BadgeId,
-          ScheduleId = ar.TimeZoneIdInternal,
-          PersonPrimaryId = ar.PersonPrimaryId
-        };
-
-      return accessRightResponse == null ? NotFound() : Ok(accessRightResponse);
+      try
+      {
+        var objectResult = await _exosService.GetExos(_client, $"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
+        var personId = JsonConvert.DeserializeObject<ExosPerson>(objectResult["value"]![0]!.ToString())!.PersonBaseData.PersonId;
+        var assignment = new { }; // TODO check with Exos what AccessRightID and TimeZoneID is available to the person based on the AdministrationArea they are assigned to and make a response object {AccessRightID, TimeZoneID}
+        await _client.PostAsync($"{_url}{_accessRightUrl1}{personId}{_accessRightUrl2}", ByteMaker(assignment));
+        return StatusCode(200);
+      }
+      catch (ArgumentOutOfRangeException)
+      {
+        return NotFound();
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, ex.Message);
+      }
     }
-    
-    // [HttpPost]
-    // public async Task<ActionResult<Person>> AssignAccessRight(AccessRightRequest accessRight)
-    // {
-    //   var newAccessRight = new AccessRight
-    //   {
-    //     BadgeId = accessRight.TimeZoneId,
-    //     BadgeName = accessRight.BadgeName,
-    //     PersonPrimaryId = accessRight.PersonPrimaryId
-    //   };
-    
-    //   var response = await _client.PostAsJsonAsync($"{_apiUrl}{_accessRightUrl}/create", newAccessRight);
-
-    //   return !response.IsSuccessStatusCode ? StatusCode(500) : NoContent();
-    // }
   }
 }

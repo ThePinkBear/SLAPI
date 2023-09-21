@@ -16,8 +16,8 @@ public class Person
   public string LastName { get; set; } = default!;
   // [JsonPropertyName("DepartmentFk")]
   // public string Department { get; set; } = default!;
-  // [JsonPropertyName("PinCode")]
-  // public string PinCode { get; set; } = default!;
+  [JsonPropertyName("PinCode")]
+  public string PinCode { get; set; } = default!;
   // public List<Badge>? Badges { get; set; }
   // public List<AccessRight>? AccessRights { get; set; }
   public PersonTenantFreeFields PersonTenantFreeFields { get; set; } = default!;

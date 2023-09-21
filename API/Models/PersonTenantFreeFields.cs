@@ -6,9 +6,9 @@ namespace Test.Models;
 public class PersonTenantFreeFields
 {
   [JsonPropertyName("Text1")]
-  public string Text1 { get; set; } = default!;
+  public string PersonType { get; set; } = default!;
   [JsonPropertyName("Text2")]
-  public string Text2 { get; set; } = default!;
+  public string Company { get; set; } = default!;
   [JsonPropertyName("Text3")]
-  public string Text3 { get; set; } = default!;
+  public string Department { get; set; } = default!;
 }

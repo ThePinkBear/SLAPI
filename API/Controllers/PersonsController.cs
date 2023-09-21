@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using Test.Models;
 using static ByteContentService;
@@ -10,7 +9,7 @@ namespace SLAPI.Controllers
   [ApiController]
   public class PersonsController : ControllerBase
   {
-    private readonly ExosService _exosService;
+    private readonly ExosRepository _exosService;
     private readonly HttpClient _client;
     private readonly string? _url;
     private readonly string? _personUrl1;
@@ -24,23 +23,24 @@ namespace SLAPI.Controllers
       _personUrl1 = config.GetValue<string>("Url:rPersonStart");
       _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
       _deleteUrl = config.GetValue<string>("Url:DeletePerson");
-      _exosService = new ExosService();
+      _exosService = new ExosRepository();
     }
 
     [HttpGet]
-    public async Task<ActionResult<PersonResponse>> GetPerson(string personalNumber)
+    public async Task<ActionResult<BetsyPersonResponse>> GetPerson(string personalNumber)
     {
       var objectResult = await _exosService.GetExos(_client, $"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
 
       try
       {
-        var person = JsonConvert.DeserializeObject<ExosPerson>(objectResult["value"]![0]!.ToString());
-        var personResponse = new PersonResponse
+        var person = JsonConvert.DeserializeObject<ExosPersonResponse>(objectResult["value"]![0]!.ToString());
+        var personResponse = new BetsyPersonResponse
         {
           PersonId = person!.PersonBaseData.PersonId,
           PersonalNumber = person.PersonBaseData.PersonalNumber,
           FirstName = person.PersonBaseData.FirstName,
-          LastName = person.PersonBaseData.LastName
+          LastName = person.PersonBaseData.LastName,
+          Department = person.PersonTenantFreeFields.Department,
         };
 
         return personResponse == null ? NotFound() : Ok(personResponse);
@@ -49,18 +49,22 @@ namespace SLAPI.Controllers
       {
         return NotFound();
       }
+      catch (Exception ex)
+      {
+        return StatusCode(500, ex.Message);
+      }
     }
 
 
     [HttpPut]
-    public async Task<IActionResult> PutPerson(string personalNumber, PersonRequest person)
+    public async Task<IActionResult> PutPerson(string personalNumber, BetsyPersonRequest person)
     {
       var personToEdit = await GetPerson(personalNumber);
       if (personToEdit.Result is NotFoundResult) return NotFound();
 
-      var result = ((OkObjectResult)personToEdit.Result!).Value as PersonResponse;
+      var result = ((OkObjectResult)personToEdit.Result!).Value as BetsyPersonResponse;
 
-      var UpdatedPerson = new ExosPersonResponse
+      var UpdatedPerson = new ExosPersonRequest
       {
         PersonBaseData = new Person
         {
@@ -69,9 +73,17 @@ namespace SLAPI.Controllers
           FirstName = person.FirstName,
           LastName = person.LastName,
           // Department = person.Department,
-          // PinCode = person.PinCode
+        },
+        PersonAccessControlData = new ExosAccessControl
+        {
+          PinCode = person.PinCode
         }
       };
+
+      // if (person.PinCode != null) 
+      // {
+      //   await _client.PostAsync($"{_url}/api/v1.0/persons/{result.PersonId}/setPin", ByteMaker(new PinRequest { PinCode = person.PinCode }));
+      // }
 
       try
       {
@@ -85,7 +97,7 @@ namespace SLAPI.Controllers
     }
 
     [HttpPost]
-    public async Task<ActionResult<ExosPersonResponse>> PostPerson(PersonRequest person)
+    public async Task<ActionResult> PostPerson(BetsyPersonRequest person)
     {
       var createdPerson = new Person
       {
@@ -93,10 +105,10 @@ namespace SLAPI.Controllers
         PersonalNumber = person.PersonalNumber,
         FirstName = person.FirstName,
         LastName = person.LastName,
+        PinCode = person.PinCode
         // Department = person.Department,
-        // PinCode = person.PinCode
       };
-      var exosPerson = new ExosPersonResponse
+      var exosPerson = new ExosPersonRequest
       {
         PersonBaseData = createdPerson
       };
@@ -104,7 +116,7 @@ namespace SLAPI.Controllers
       {
         await _client.PostAsync($"{_url}/api/v1.0/persons/create", ByteMaker(exosPerson));
 
-        return Ok(exosPerson);
+        return Ok();
       }
       catch (Exception ex)
       {
@@ -120,7 +132,7 @@ namespace SLAPI.Controllers
       var person = await GetPerson(id);
       if (person.Result is NotFoundResult) return NotFound();
 
-      var result = ((OkObjectResult)person.Result!).Value as PersonResponse;
+      var result = ((OkObjectResult)person.Result!).Value as BetsyPersonResponse;
 
       var response = await _client.PostAsync($"{_url}{_deleteUrl}{result!.PersonId}/delete?checkOnly=false", null);
 

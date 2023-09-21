@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Test.Models;
 
-public class PersonRequest
+public class BetsyPersonRequest
 {
     [Required]
     public string PersonalNumber { get; set; } = default!;
@@ -11,8 +11,6 @@ public class PersonRequest
     public string FirstName { get; set; } = default!;
     [Required]
     public string LastName { get; set; } = default!;
-    // [Required]
     // public string Department { get; set; } = default!;
-    // [Required]
-    // public string PinCode { get; set; } = default!;
+    public string PinCode { get; set; } = default!;
 }

@@ -14,7 +14,7 @@ namespace SLAPI.Controllers
     private readonly string? _url;
     private readonly string? _cardUrl1;
     private readonly string? _cardUrl2;
-    private readonly ExosService _exosService;
+    private readonly ExosRepository _exosService;
 
     public CardsController(IHttpClientFactory client, IConfiguration config)
     {
@@ -22,7 +22,7 @@ namespace SLAPI.Controllers
       _cardUrl2 = config.GetValue<string>("Url:GetBadgeEnd");
       _client = client.CreateClient("ExosClientDev");
       _url = config.GetValue<string>("ExosUrl");
-      _exosService = new ExosService();
+      _exosService = new ExosRepository();
     }
 
     [HttpGet]

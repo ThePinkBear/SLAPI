@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Test.Models;
 
-public class PersonResponse
+public class BetsyPersonResponse
 {
   [JsonPropertyName("PersonId")]
   public string PersonId { get; set; } = default!;
@@ -16,8 +16,9 @@ public class PersonResponse
   public string FirstName { get; set; } = default!;
   [JsonPropertyName("LastName")]
   public string LastName { get; set; } = default!;
-  // [JsonPropertyName("DepartmentFk")]
-  // public string Department { get; set; } = default!;
-  // [JsonPropertyName("PinCode")]
-  // public string PinCode { get; set; } = default!;
+  [JsonPropertyName("Department")]
+  public string Department { get; set; } = default!;
+  [JsonPropertyName("PinCode")]
+  public string PinCode { get; set; } = default!;
+
 }

@@ -14,6 +14,7 @@ namespace SLAPI.Controllers
     private readonly string? _url;
     private readonly string? _personUrl1;
     private readonly string? _personUrl2;
+    private readonly ExosRepository _exosService;
 
     public PersonController(IHttpClientFactory client, IConfiguration config)
     {
@@ -21,17 +22,20 @@ namespace SLAPI.Controllers
       _url = config.GetValue<string>("ExosUrl");
       _personUrl1 = config.GetValue<string>("Url:rPersonStart");
       _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
+      _exosService = new ExosRepository();
     }
 
     [HttpGet]
     public async Task<ActionResult<List<AccessRightResponse>>> GetPerson(string personalNumber)
     {
-      var response = await _client.GetAsync($"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
-      var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
+      // var response = await _client.GetAsync($"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
+      // var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
+      var objectR = _exosService.GetExos(_client, $"{_url}{_personUrl1}{personalNumber}{_personUrl2}").Result;
+      
       var person = new ExosPerson();
       try
       {
-        person = JsonConvert.DeserializeObject<ExosPerson>(objectResult["value"]![0]!.ToString());
+        person = JsonConvert.DeserializeObject<ExosPerson>(objectR["value"]![0]!.ToString());
       }
       catch (ArgumentOutOfRangeException)
       {

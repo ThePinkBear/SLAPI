@@ -9,7 +9,7 @@ namespace SLAPI.Controllers
   [ApiController]
   public class AccessPointsController : ControllerBase
   {
-    private readonly ExosService _exosService;
+    private readonly ExosRepository _exosService;
     private readonly HttpClient _client;
     private readonly string? _url;
     private readonly string? _accessPointUrl;
@@ -19,7 +19,7 @@ namespace SLAPI.Controllers
       _client = client.CreateClient("ExosClientDev");
       _url = config.GetValue<string>("ExosUrl");
       _accessPointUrl = config.GetValue<string>("Url:AccessPoint");
-      _exosService = new ExosService();
+      _exosService = new ExosRepository();
     }
 
     [HttpGet]
