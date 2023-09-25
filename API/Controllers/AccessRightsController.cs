@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Test.Models;
 using static ByteContentService;
 
@@ -37,7 +36,11 @@ namespace SLAPI.Controllers
       {
         var objectResult = await _exosService.GetExos(_client, $"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
         var personId = JsonConvert.DeserializeObject<ExosPerson>(objectResult["value"]![0]!.ToString())!.PersonBaseData.PersonId;
-        var assignment = new { }; // TODO check with Exos what AccessRightID and TimeZoneID is available to the person based on the AdministrationArea they are assigned to and make a response object {AccessRightID, TimeZoneID}
+        var assignment = new ExosAssignmentRequest{
+          AccessRightId = "",
+          TimeZoneId = ""
+        };
+         // TODO check with Exos what AccessRightID and TimeZoneID is available to the person based on the AdministrationArea they are assigned to and make a response object {AccessRightID, TimeZoneID}
         await _client.PostAsync($"{_url}{_accessRightUrl1}{personId}{_accessRightUrl2}", ByteMaker(assignment));
         return StatusCode(200);
       }
