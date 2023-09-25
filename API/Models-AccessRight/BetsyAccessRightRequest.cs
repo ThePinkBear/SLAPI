@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Test.Models;
 
-public class AccessRightRequest
+public class BetsyAccessRightRequest
 {
     [Required]
     public string BadgeName { get; set; } = default!;

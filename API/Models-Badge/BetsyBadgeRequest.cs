@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Test.Models;
 
-public class BadgeRequest
+public class BetsyBadgeRequest
 {
   [Required]
   public string BadgeName { get; set; } = default!;

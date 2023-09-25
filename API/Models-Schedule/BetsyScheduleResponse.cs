@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Test.Models;
 
-public class Schedule
+public class BetsyScheduleResponse
 {
     [Key]
     [JsonProperty("TimeZoneIdInternal")]

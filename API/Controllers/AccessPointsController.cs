@@ -23,13 +23,13 @@ namespace SLAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<AccessPointResponse>>> GetAccessPoints(string? accessPointId)
+    public async Task<ActionResult<List<BetsyAccessPointResponse>>> GetAccessPoints(string? accessPointId)
     {
       var devices = await _exosService.GetExos<AccessPoint>(_client, $"{_url}{_accessPointUrl}", "Value", "Devices");
 
       var accessPointResponses =
         from accesspoint in devices
-        select new AccessPointResponse
+        select new BetsyAccessPointResponse
         {
           AccessPointId = accesspoint.Id,
           Address = accesspoint.Address,

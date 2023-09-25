@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Test.Models;
 
-public class BadgeExosRequest
+public class ExosBadgeRequest
 {
     [JsonPropertyName("BadgeName")]
     public string BadgeName { get; set; } = default!;

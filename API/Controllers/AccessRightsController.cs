@@ -31,7 +31,7 @@ namespace SLAPI.Controllers
     }
 
     [HttpPost("{personalNumber}")]
-    public async Task<ActionResult> AssignAccessRight(string personalNumber, AccessRightRequest accessRight)
+    public async Task<ActionResult> AssignAccessRight(string personalNumber, BetsyAccessRightRequest accessRight)
     {
       try
       {

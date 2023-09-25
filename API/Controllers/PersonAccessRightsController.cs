@@ -26,35 +26,33 @@ namespace SLAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<AccessRightResponse>>> GetPerson(string personalNumber)
+    public ActionResult<List<BetsyAccessRightResponse>> GetPerson(string personalNumber)
     {
-      // var response = await _client.GetAsync($"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
-      // var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
-      var objectR = _exosService.GetExos(_client, $"{_url}{_personUrl1}{personalNumber}{_personUrl2}").Result;
-      
-      var person = new ExosPerson();
+      var objectResponse = _exosService.GetExos(_client, $"{_url}{_personUrl1}{personalNumber}{_personUrl2}").Result;
+
       try
       {
-        person = JsonConvert.DeserializeObject<ExosPerson>(objectR["value"]![0]!.ToString());
-      }
-      catch (ArgumentOutOfRangeException)
-      {
-        return NotFound($"No person with this Id: {personalNumber} found");
-      }
+        var person = JsonConvert.DeserializeObject<ExosPerson>(objectResponse["value"]![0]!.ToString());
+        var result = new List<BetsyAccessRightResponse>();
 
-      var result = new List<AccessRightResponse>();
-    
         result.AddRange(from accessRight in person?.PersonAccessControlData.accessRights
-                        select new AccessRightResponse()
+                        select new BetsyAccessRightResponse()
                         {
                           AccessPointId = accessRight.BadgeId,
                           PersonPrimaryId = accessRight.BadgeName,
                           ScheduleId = accessRight.TimeZoneIdInternal
                         });
-      
-      return Ok(result); // TODO Check if empty array or 404 as return for no accessrights found
+
+        return Ok(result);
+      }
+      catch (ArgumentOutOfRangeException)
+      {
+        return NotFound($"No person with this Id: {personalNumber} found");
+      }
+      catch (Exception ex)
+      {
+        return BadRequest(ex.Message);
+      }
     }
-
-
   }
 }

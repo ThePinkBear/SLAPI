@@ -126,10 +126,10 @@ namespace SLAPI.Controllers
     }
 
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePerson(string id)
+    [HttpDelete("{personalNumber}")]
+    public async Task<IActionResult> DeletePerson(string personalNumber)
     {
-      var person = await GetPerson(id);
+      var person = await GetPerson(personalNumber);
       if (person.Result is NotFoundResult) return NotFound();
 
       var result = ((OkObjectResult)person.Result!).Value as BetsyPersonResponse;

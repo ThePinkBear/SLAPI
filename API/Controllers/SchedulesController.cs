@@ -21,11 +21,11 @@ namespace SLAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Schedule>>> GetSchedules()
+    public async Task<ActionResult<List<BetsyScheduleResponse>>> GetSchedules()
     {
       var response = await _client.GetAsync($"{_url}{_scheduleUrl}");
       var objectResult = JObject.Parse(await response.Content.ReadAsStringAsync());
-      var schedules = JsonConvert.DeserializeObject<List<Schedule>>(objectResult["value"]!.ToString());
+      var schedules = JsonConvert.DeserializeObject<List<BetsyScheduleResponse>>(objectResult["value"]!.ToString());
 
       return schedules == null ? NotFound() : Ok(schedules);
     }

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Test.Models;
 
-public class AccessRightResponse
+public class BetsyAccessRightResponse
 {
   public int Id { get; set; }
   public string PersonPrimaryId { get; set; } = default!;

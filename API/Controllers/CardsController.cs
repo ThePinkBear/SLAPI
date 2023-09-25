@@ -26,12 +26,12 @@ namespace SLAPI.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<BadgeResponse>>> GetCard(string? badgeName)
+    public async Task<ActionResult<List<BetsyBadgeResponse>>> GetCard(string? badgeName)
     {
       var cards = await _exosService.GetExos<Badge>(_client, $"{_url}{_cardUrl1}{badgeName}{_cardUrl2}", "value");
 
       var cardResponse = from card in cards
-                         select new BadgeResponse
+                         select new BetsyBadgeResponse
                          {
                            BadgeName = card!.BadgeName
                            //PersonPrimaryId = card.Person.PersonalNumber
@@ -42,9 +42,9 @@ namespace SLAPI.Controllers
     }
 
     [HttpPost]
-    public async Task<ActionResult<Badge>> CreateCard(BadgeRequest badge)
+    public async Task<ActionResult<Badge>> CreateCard(BetsyBadgeRequest badge)
     {
-      var newBadge = new BadgeExosRequest
+      var newBadge = new ExosBadgeRequest
       {
         BadgeName = badge.BadgeName,
         MediaDefinitionFk = 1,
@@ -71,7 +71,7 @@ namespace SLAPI.Controllers
     [HttpDelete]
     public async Task<IActionResult> DeleteCard(string badgeName)
     {
-      var deleteRequest = new BadgeDeleteRequest
+      var deleteRequest = new BetsyBadgeRequest
       {
         BadgeName = badgeName
       };

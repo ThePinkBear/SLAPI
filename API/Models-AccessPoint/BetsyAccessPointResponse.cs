@@ -1,6 +1,6 @@
 namespace Test.Models;
 
-public class AccessPointResponse
+public class BetsyAccessPointResponse
 {
    
     public string AccessPointId { get; set; } = default!;
