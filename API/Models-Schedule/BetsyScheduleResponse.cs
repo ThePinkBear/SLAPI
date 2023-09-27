@@ -1,15 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 
 namespace Test.Models;
 
 public class BetsyScheduleResponse
 {
-    [Key]
-    [JsonProperty("TimeZoneIdInternal")]
-    public int TimeZoneIdInternal { get; set; }
-    [JsonProperty("TimeZoneId")]
-    public string TimeZoneId { get; set; } = default!;
-    [JsonProperty("DisplayName")]
-    public string DisplayName { get; set; } = default!;
+    [JsonPropertyName("ScheduleId")]
+    public string ScheduleId { get; set; } = default!;
+    [JsonPropertyName("Description")]
+    public string Description { get; set; } = default!;
 }

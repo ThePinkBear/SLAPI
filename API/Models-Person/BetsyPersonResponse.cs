@@ -8,7 +8,7 @@ public class BetsyPersonResponse
 {
   [JsonPropertyName("PersonId")]
   public string PersonId { get; set; } = default!;
-  [JsonPropertyName("PersonalNumber")]
+  [JsonPropertyName("PrimaryId")]
   [Key]
   public string PersonalNumber { get; set; } = default!;
 

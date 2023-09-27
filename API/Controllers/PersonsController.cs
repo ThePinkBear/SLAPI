@@ -62,7 +62,7 @@ namespace SLAPI.Controllers
       var personToEdit = await GetPerson(personalNumber);
       if (personToEdit.Result is NotFoundResult) return NotFound();
 
-      var result = ((OkObjectResult)personToEdit.Result!).Value as BetsyPersonResponse;
+      var result = ((OkObjectResult)personToEdit.Result!).Value as Person;
 
       var UpdatedPerson = new ExosPersonRequest
       {
@@ -72,11 +72,14 @@ namespace SLAPI.Controllers
           PersonalNumber = person.PersonalNumber,
           FirstName = person.FirstName,
           LastName = person.LastName,
-          // Department = person.Department,
         },
         PersonAccessControlData = new ExosAccessControl
         {
           PinCode = person.PinCode
+        },
+        PersonTenantFreeFields = new PersonTenantFreeFields
+        {
+          Department = person.Department
         }
       };
 
@@ -106,11 +109,14 @@ namespace SLAPI.Controllers
         FirstName = person.FirstName,
         LastName = person.LastName,
         PinCode = person.PinCode
-        // Department = person.Department,
       };
       var exosPerson = new ExosPersonRequest
       {
-        PersonBaseData = createdPerson
+        PersonBaseData = createdPerson,
+        PersonTenantFreeFields = new PersonTenantFreeFields
+        {
+          Department = person.Department
+        }
       };
       try
       {
@@ -135,7 +141,6 @@ namespace SLAPI.Controllers
       var result = ((OkObjectResult)person.Result!).Value as BetsyPersonResponse;
 
       var response = await _client.PostAsync($"{_url}{_deleteUrl}{result!.PersonId}/delete?checkOnly=false", null);
-
 
       return !response.IsSuccessStatusCode ? StatusCode(500) : NoContent();
     }

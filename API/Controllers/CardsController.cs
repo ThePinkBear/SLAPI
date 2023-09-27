@@ -28,17 +28,34 @@ namespace SLAPI.Controllers
     [HttpGet]
     public async Task<ActionResult<List<BetsyBadgeResponse>>> GetCard(string? badgeName)
     {
-      var cards = await _exosService.GetExos<Badge>(_client, $"{_url}{_cardUrl1}{badgeName}{_cardUrl2}", "value");
+      try
+      {
 
-      var cardResponse = from card in cards
-                         select new BetsyBadgeResponse
-                         {
-                           BadgeName = card!.BadgeName
-                           //PersonPrimaryId = card.Person.PersonalNumber
-                         };
+        var cards = await _exosService.GetExos<Badge>(_client, $"{_url}{_cardUrl1}{badgeName}{_cardUrl2}", "value");
 
 
-      return Ok(cardResponse);
+        var cardResponse = from c in cards
+          select new BetsyBadgeResponse
+          {
+            CardNumber = c!.BadgeName
+            //PersonPrimaryId = card.Person.PersonalNumber
+          };
+
+        if (String.IsNullOrEmpty(badgeName)) return Ok(cardResponse);
+
+        var card = 
+        (
+          from c in cardResponse 
+          where c.CardNumber == badgeName 
+          select c
+        ).FirstOrDefault();
+
+        return Ok(cardResponse);
+      }
+      catch (Exception ex)
+      {
+        return BadRequest(ex.Message);
+      }
     }
 
     [HttpPost]

@@ -27,28 +27,29 @@ namespace SLAPI.Controllers
     {
       var devices = await _exosService.GetExos<AccessPoint>(_client, $"{_url}{_accessPointUrl}", "Value", "Devices");
 
-      var accessPointResponses =
-        from accesspoint in devices
+      var accessPoints =
+        from device in devices
         select new BetsyAccessPointResponse
         {
-          AccessPointId = accesspoint.Id,
-          Address = accesspoint.Address,
-          Description = accesspoint.AccessPointId
+          AccessPointId = device.Id,
+          Address = device.Address,
+          Description = device.AccessPointId
         };
       
       if (!String.IsNullOrEmpty(accessPointId))
       { 
-        var result = accessPointResponses
+        var accessPoint = accessPoints
                         .Where(x => x.AccessPointId == accessPointId)
                         .Select(x => x).FirstOrDefault();
-        return result == null 
+        return accessPoint == null 
                           ? NotFound()
-                          : Ok(result);                                        
+                          : Ok(accessPoint);                                        
       }
       
-      return accessPointResponses == null ? NotFound() : Ok(accessPointResponses);
+      return accessPoints == null ? NotFound() : Ok(accessPoints);
     }
 
+    // TODO THe route in ExosApi "api/AccessPoints/{AccessPointId}/Open/{PrimaryId}" open seems hardcoded, ApId and PId is sent, only bool true or false returned dependant on modelstate.
     [HttpPut("{id} {command}")]
     public async Task<IActionResult> PutAccessPoint(string id, string command)
     {
