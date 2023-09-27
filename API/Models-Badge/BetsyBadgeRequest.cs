@@ -6,5 +6,5 @@ namespace Test.Models;
 public class BetsyBadgeRequest
 {
   [Required]
-  public string BadgeName { get; set; } = default!;
+  public string CardNumber { get; set; } = default!;
 }

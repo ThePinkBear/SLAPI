@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Test.Models;
 
-public class Badge
+public class ExosBadgeResponse
 {
     [JsonPropertyName("BadgeName")]
     public string BadgeName { get; set; } = default!;

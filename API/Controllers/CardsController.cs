@@ -4,96 +4,86 @@ using Newtonsoft.Json.Linq;
 using Test.Models;
 using static ByteContentService;
 
-namespace SLAPI.Controllers
+namespace SLAPI.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class CardsController : ControllerBase
 {
-  [Route("api/[controller]")]
-  [ApiController]
-  public class CardsController : ControllerBase
+  private readonly HttpClient _client;
+  private readonly string? _url;
+  private readonly string? _cardUrl1;
+  private readonly string? _cardUrl2;
+  private readonly ExosRepository _exosService;
+
+  public CardsController(IHttpClientFactory client, IConfiguration config)
   {
-    private readonly HttpClient _client;
-    private readonly string? _url;
-    private readonly string? _cardUrl1;
-    private readonly string? _cardUrl2;
-    private readonly ExosRepository _exosService;
+    _cardUrl1 = config.GetValue<string>("Url:GetBadgeStart");
+    _cardUrl2 = config.GetValue<string>("Url:GetBadgeEnd");
+    _client = client.CreateClient("ExosClientDev");
+    _url = config.GetValue<string>("ExosUrl");
+    _exosService = new ExosRepository();
+  }
 
-    public CardsController(IHttpClientFactory client, IConfiguration config)
+  [HttpGet]
+  public async Task<ActionResult<List<BetsyBadgeResponse>>> GetCard(string? badgeName)
+  {
+    try
     {
-      _cardUrl1 = config.GetValue<string>("Url:GetBadgeStart");
-      _cardUrl2 = config.GetValue<string>("Url:GetBadgeEnd");
-      _client = client.CreateClient("ExosClientDev");
-      _url = config.GetValue<string>("ExosUrl");
-      _exosService = new ExosRepository();
-    }
+      var cards = await _exosService.GetExos<ExosBadgeResponse>(_client, $"{_url}{_cardUrl1}{badgeName}{_cardUrl2}", "value");
 
-    [HttpGet]
-    public async Task<ActionResult<List<BetsyBadgeResponse>>> GetCard(string? badgeName)
+      var cardResponse = from c in cards
+                         select new BetsyBadgeResponse
+                         {
+                           CardNumber = c!.BadgeName,
+                           PersonPrimaryId = c.Person.PersonalNumber
+                         };
+
+      return Ok(cardResponse);
+    }
+    catch (Exception ex)
     {
-      try
-      {
-
-        var cards = await _exosService.GetExos<Badge>(_client, $"{_url}{_cardUrl1}{badgeName}{_cardUrl2}", "value");
-
-
-        var cardResponse = from c in cards
-          select new BetsyBadgeResponse
-          {
-            CardNumber = c!.BadgeName
-            //PersonPrimaryId = card.Person.PersonalNumber
-          };
-
-        if (String.IsNullOrEmpty(badgeName)) return Ok(cardResponse);
-
-        var card = 
-        (
-          from c in cardResponse 
-          where c.CardNumber == badgeName 
-          select c
-        ).FirstOrDefault();
-
-        return Ok(cardResponse);
-      }
-      catch (Exception ex)
-      {
-        return BadRequest(ex.Message);
-      }
+      return Ok(ex.Message);
     }
+  }
 
-    [HttpPost]
-    public async Task<ActionResult<Badge>> CreateCard(BetsyBadgeRequest badge)
+  [HttpPost]
+  public async Task<ActionResult<ExosBadgeResponse>> CreateCard(BetsyBadgeRequest badge)
+  {
+    try
     {
       var newBadge = new ExosBadgeRequest
       {
-        BadgeName = badge.BadgeName,
+        BadgeName = badge.CardNumber,
         MediaDefinitionFk = 1,
+        MediaRoleAuthorisation = "All",
         ApplicationDefinitions = new List<ApplicationDefinition>
         {
           new ApplicationDefinition
           {
-            BadgeNumber = badge.BadgeName,
+            BadgeNumber = badge.CardNumber,
             ApplicationDefinitionFk = 1
           }
         }
       };
-      try
-      {
-        await _client.PostAsync($"{_url}/api/v1.0/badges/create", ByteMaker(newBadge));
-        return NoContent();
-      }
-      catch (Exception)
-      {
-        return BadRequest();
-      }
-    }
-
-    [HttpDelete]
-    public async Task<IActionResult> DeleteCard(string badgeName)
-    {
-      var deleteRequest = new BetsyBadgeRequest
-      {
-        BadgeName = badgeName
-      };
-      await _client.PostAsync($"{_url}/api/v1.0/badges/delete", ByteMaker(deleteRequest));
+      await _client.PostAsync($"{_url}/api/v1.0/badges/create", ByteMaker(newBadge));
       return NoContent();
     }
+    catch (Exception)
+    {
+      return BadRequest();
+    }
+  }
+
+  [HttpDelete]
+  public async Task<IActionResult> DeleteCard(string badgeName)
+  {
+    var deleteRequest = new BetsyBadgeRequest
+    {
+      CardNumber = badgeName
+    };
+    await _client.PostAsync($"{_url}/api/v1.0/badges/delete", ByteMaker(deleteRequest));
+    return NoContent();
   }
 }
+
