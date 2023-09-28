@@ -1,6 +1,3 @@
-using System.Text.Json.Serialization;
-using Test.Models;
-
 public class ExosAccessControl
 {
   [JsonPropertyName("PinCode")]

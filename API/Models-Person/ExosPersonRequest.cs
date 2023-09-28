@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Test.Models;
 
 public class ExosPersonRequest
