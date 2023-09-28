@@ -76,11 +76,11 @@ public class CardsController : ControllerBase
   }
 
   [HttpDelete]
-  public async Task<IActionResult> DeleteCard(string badgeName)
+  public async Task<IActionResult> DeleteCard(BetsyBadgeRequest badgeName)
   {
-    var deleteRequest = new BetsyBadgeRequest
+    var deleteRequest = new ExosBadgeDeleteRequest
     {
-      CardNumber = badgeName
+      BadgeName = badgeName.CardNumber
     };
     await _client.PostAsync($"{_url}/api/v1.0/badges/delete", ByteMaker(deleteRequest));
     return NoContent();
