@@ -1,9 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Test.Models;
-using static ByteContentService;
-
 namespace SLAPI.Controllers;
 
 [Route("api/[controller]")]

@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using Newtonsoft.Json;
 
 namespace Test.Models;
 
@@ -9,9 +7,7 @@ public class BetsyPersonResponse
   [JsonPropertyName("PersonId")]
   public string PersonId { get; set; } = default!;
   [JsonPropertyName("PrimaryId")]
-  [Key]
   public string PersonalNumber { get; set; } = default!;
-
   [JsonPropertyName("FirstName")]
   public string FirstName { get; set; } = default!;
   [JsonPropertyName("LastName")]
