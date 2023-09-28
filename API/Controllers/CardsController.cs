@@ -36,7 +36,7 @@ public class CardsController : ControllerBase
                          select new BetsyBadgeResponse
                          {
                            CardNumber = c!.BadgeName,
-                           PersonPrimaryId = c.Person.PersonalNumber
+                          //  PersonPrimaryId = c.Person.PersonBaseData.PersonalNumber
                          };
 
       return Ok(cardResponse);
@@ -65,6 +65,13 @@ public class CardsController : ControllerBase
             ApplicationDefinitionFk = 1
           }
         }
+        // Person = new ExosPerson
+        // {
+        //   PersonBaseData = new Person
+        //   {
+        //     PersonalNumber = ""
+        //   }
+        // }
       };
       await _client.PostAsync($"{_url}/api/v1.0/badges/create", ByteMaker(newBadge));
       return NoContent();

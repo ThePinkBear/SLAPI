@@ -1,0 +1,13 @@
+{
+  "@odata.count": 1,
+  "value": [
+    {
+      "BadgeName": "ApiCard1",
+      "Person": {
+        "PersonBaseData": {
+          "PersonalNumber": ""
+        }
+      }
+    }
+  ]
+}

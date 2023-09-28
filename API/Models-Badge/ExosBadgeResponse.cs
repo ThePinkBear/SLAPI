@@ -10,5 +10,5 @@ public class ExosBadgeResponse
     public string BadgeName { get; set; } = default!;
 
     [JsonPropertyName("Person")]
-    public Person Person { get; set; } = default!;
+    public ExosPerson Person { get; set; } = default!;
 }

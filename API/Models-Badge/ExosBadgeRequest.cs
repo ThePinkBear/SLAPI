@@ -12,4 +12,6 @@ public class ExosBadgeRequest
   public string MediaRoleAuthorisation { get; internal set; } = default!;
   [JsonPropertyName("ApplicationDefinitions")]
   public List<ApplicationDefinition> ApplicationDefinitions { get; set; } = default!;
+  // [JsonPropertyName("Person")]
+  // public ExosPerson Person { get; set; } = default!;
 }
