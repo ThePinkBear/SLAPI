@@ -55,25 +55,24 @@ public class PersonsController : ControllerBase
     var personToEdit = await GetPerson(personalNumber);
     if (personToEdit.Result is NotFoundResult) return NotFound();
 
-    var result = ((OkObjectResult)personToEdit.Result!).Value as Person;
+    var result = ((OkObjectResult)personToEdit.Result!).Value as BetsyPersonResponse;
 
     var UpdatedPerson = new ExosPersonRequest
     {
-      PersonBaseData = new Person
+      PersonBaseData = new PersonRequest
       {
-        PersonId = result!.PersonId,
-        PersonalNumber = person.PersonalNumber,
-        FirstName = person.FirstName,
-        LastName = person.LastName,
-      },
-      PersonAccessControlData = new ExosAccessControl
-      {
-        PinCode = person.PinCode
-      },
-      PersonTenantFreeFields = new PersonTenantFreeFields
-      {
-        Department = person.Department
+        PersonalNumber = person.PersonalNumber?? "",
+        FirstName = person.FirstName?? "",
+        LastName = person.LastName?? ""
       }
+      // PersonAccessControlData = new ExosAccessControl
+      // {
+      //   PinCode = person.PinCode
+      // },
+      // PersonTenantFreeFields = new PersonTenantFreeFields
+      // {
+      //   Department = person.Department
+      // }
     };
 
     // if (person.PinCode != null) 
@@ -83,8 +82,8 @@ public class PersonsController : ControllerBase
 
     try
     {
-      await _client.PostAsync($"{_url}/api/v1.0/persons/{result!.PersonId}/update?ignoreBlacklist=false", ByteMaker(UpdatedPerson));
-      return NoContent();
+      var response = await _client.PostAsync($"{_url}/api/v1.0/persons/{result!.PersonId}/update?ignoreBlacklist=false", ByteMaker(UpdatedPerson));
+      return Ok(response.StatusCode);
     }
     catch (Exception ex)
     {
@@ -95,13 +94,11 @@ public class PersonsController : ControllerBase
   [HttpPost]
   public async Task<ActionResult> PostPerson(BetsyPersonRequest person)
   {
-    var createdPerson = new Person
+    var createdPerson = new PersonRequest
     {
-      PersonId = Guid.NewGuid().ToString(),
       PersonalNumber = person.PersonalNumber,
       FirstName = person.FirstName,
-      LastName = person.LastName,
-      PinCode = person.PinCode
+      LastName = person.LastName
     };
     var exosPerson = new ExosPersonRequest
     {
@@ -115,7 +112,7 @@ public class PersonsController : ControllerBase
     {
       await _client.PostAsync($"{_url}/api/v1.0/persons/create", ByteMaker(exosPerson));
 
-      return Ok();
+      return Ok(exosPerson.PersonBaseData.PersonalNumber);
     }
     catch (Exception ex)
     {

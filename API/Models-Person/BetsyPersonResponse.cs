@@ -9,12 +9,11 @@ public class BetsyPersonResponse
   [JsonPropertyName("PrimaryId")]
   public string PersonalNumber { get; set; } = default!;
   [JsonPropertyName("FirstName")]
-  public string FirstName { get; set; } = default!;
+  public string? FirstName { get; set; }
   [JsonPropertyName("LastName")]
-  public string LastName { get; set; } = default!;
+  public string? LastName { get; set; }
   [JsonPropertyName("Department")]
-  public string Department { get; set; } = default!;
-  [JsonPropertyName("PinCode")]
-  public string PinCode { get; set; } = default!;
-
+  public string? Department { get; set; }
+  // [JsonPropertyName("PinCode")]
+  // public string? PinCode { get; set; }
 }
