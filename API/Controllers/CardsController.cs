@@ -1,9 +1,12 @@
+using Microsoft.Identity.Client;
+
 namespace SLAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 public class CardsController : ControllerBase
 {
+  private static PersonsController _personClient = default!;
   private readonly HttpClient _client;
   private readonly string? _url;
   private readonly string? _cardUrl1;
@@ -17,6 +20,7 @@ public class CardsController : ControllerBase
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
     _exosService = new ExosRepository();
+    _personClient = new PersonsController(client, config);
   }
 
   [HttpGet]
@@ -24,13 +28,15 @@ public class CardsController : ControllerBase
   {
     try
     {
-      var cards = await _exosService.GetExos<ExosBadgeResponse>(_client, $"{_url}{_cardUrl1}{badgeName}{_cardUrl2}", "value");
+      // var cards = await _exosService.GetExos<ExosBadgeResponse>(_client, $"{_url}{_cardUrl1}{badgeName}{_cardUrl2}", "value");
 
-      var cardResponse = from c in cards
-                         select new BetsyBadgeResponse
+      var objectResult = await _exosService.GetExos(_client, $"{_url}/api/v1.0/badges?badgeName={badgeName}");
+      var card = JsonConvert.DeserializeObject<ExosBadgeResponse>(objectResult["value"]![0]!.ToString());
+
+      var cardResponse =  new BetsyBadgeResponse
                          {
-                           CardNumber = c!.BadgeName,
-                          //  PersonPrimaryId = c.Person.PersonBaseData.PersonalNumber
+                           CardNumber = card!.BadgeName,
+                           //PersonPrimaryId = card.Person.PersonBaseData.PersonalNumber
                          };
 
       return Ok(cardResponse);
@@ -59,15 +65,17 @@ public class CardsController : ControllerBase
             ApplicationDefinitionFk = 1
           }
         }
-        // Person = new ExosPerson
-        // {
-        //   PersonBaseData = new Person
-        //   {
-        //     PersonalNumber = ""
-        //   }
-        // }
       };
-      await _client.PostAsync($"{_url}/api/v1.0/badges/create", ByteMaker(newBadge));
+
+      var response = await _client.PostAsync($"{_url}/api/v1.0/badges/create", ByteMaker(newBadge));
+      if (response.IsSuccessStatusCode)
+      {
+        var person = await _personClient.GetPerson(badge.PersonalNumber);
+        if (person.Result is NotFoundResult) return NotFound();
+        var personResponse = ((OkObjectResult)person.Result!).Value as BetsyPersonResponse;
+        await _client.PostAsync($"{_url}/api/v1.0/persons/{personResponse!.PersonId}/assignBadge?ignoreBlacklist=false", ByteMaker(new { BadgeName = badge.CardNumber }));
+
+      }
       return NoContent();
     }
     catch (Exception)

@@ -1,7 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-using Newtonsoft.Json;
-
 namespace Test.Models;
 
 public class ExosBadgeResponse
@@ -10,5 +6,5 @@ public class ExosBadgeResponse
     public string BadgeName { get; set; } = default!;
 
     [JsonPropertyName("Person")]
-    public ExosPerson Person { get; set; } = default!;
+    public ExosBadgePersonResponse Person { get; set; } = default!;
 }

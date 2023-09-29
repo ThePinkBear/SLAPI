@@ -32,7 +32,7 @@ public class PersonsController : ControllerBase
         PersonId = person!.PersonBaseData.PersonId,
         PersonalNumber = person.PersonBaseData.PersonalNumber,
         FirstName = person.PersonBaseData.FirstName,
-        LastName = person.PersonBaseData.LastName,
+        LastName = person.PersonBaseData.LastName
         // Department = person.PersonTenantFreeFields.Department,
       };
 
@@ -50,7 +50,7 @@ public class PersonsController : ControllerBase
 
 
   [HttpPut]
-  public async Task<IActionResult> PutPerson(string personalNumber, BetsyPersonRequest person)
+  public async Task<IActionResult> PutPerson(string personalNumber, BetsyPersonPutRequest person)
   {
     var personToEdit = await GetPerson(personalNumber);
     if (personToEdit.Result is NotFoundResult) return NotFound();
@@ -61,29 +61,25 @@ public class PersonsController : ControllerBase
     {
       PersonBaseData = new PersonRequest
       {
-        PersonalNumber = person.PersonalNumber?? "",
-        FirstName = person.FirstName?? "",
-        LastName = person.LastName?? ""
+        PersonalNumber = String.IsNullOrEmpty(person.PersonalNumber) ? result!.PersonalNumber : person.PersonalNumber!,
+        FirstName = String.IsNullOrEmpty(person.FirstName) ? result!.FirstName! : person.FirstName!,
+        LastName = String.IsNullOrEmpty(person.LastName) ? result!.LastName! : person.LastName!
       }
-      // PersonAccessControlData = new ExosAccessControl
-      // {
-      //   PinCode = person.PinCode
-      // },
       // PersonTenantFreeFields = new PersonTenantFreeFields
       // {
       //   Department = person.Department
       // }
     };
 
-    // if (person.PinCode != null) 
-    // {
-    //   await _client.PostAsync($"{_url}/api/v1.0/persons/{result.PersonId}/setPin", ByteMaker(new PinRequest { PinCode = person.PinCode }));
-    // }
+    if (person.PinCode != null) 
+    {
+      await _client.PostAsync($"{_url}/api/v1.0/persons/{result!.PersonId}/setPin", ByteMaker(person.PinCode ));
+    }
 
     try
     {
       var response = await _client.PostAsync($"{_url}/api/v1.0/persons/{result!.PersonId}/update?ignoreBlacklist=false", ByteMaker(UpdatedPerson));
-      return Ok(response.StatusCode);
+      return Ok(person.PersonalNumber);
     }
     catch (Exception ex)
     {
@@ -92,27 +88,30 @@ public class PersonsController : ControllerBase
   }
 
   [HttpPost]
-  public async Task<ActionResult> PostPerson(BetsyPersonRequest person)
+  public async Task<ActionResult> PostPerson(BetsyPersonCreateRequest person)
   {
     var createdPerson = new PersonRequest
     {
       PersonalNumber = person.PersonalNumber,
-      FirstName = person.FirstName,
-      LastName = person.LastName
+      FirstName = person.FirstName?? "",
+      LastName = person.LastName?? ""
     };
     var exosPerson = new ExosPersonRequest
     {
-      PersonBaseData = createdPerson,
-      PersonTenantFreeFields = new PersonTenantFreeFields
-      {
-        Department = person.Department
-      }
+      PersonBaseData = createdPerson
     };
     try
     {
-      await _client.PostAsync($"{_url}/api/v1.0/persons/create", ByteMaker(exosPerson));
+      var posted = await _client.PostAsync($"{_url}/api/v1.0/persons/create?ignoreblackList=false", ByteMaker(exosPerson));
 
-      return Ok(exosPerson.PersonBaseData.PersonalNumber);
+      if ( posted.IsSuccessStatusCode && !String.IsNullOrEmpty(person.PinCode))
+      {
+        var response = await GetPerson(person.PersonalNumber!);
+        var result = ((OkObjectResult)response.Result!).Value as BetsyPersonResponse;
+        await _client.PostAsync($"{_url}/api/v1.0/persons/{result!.PersonId}/setPin", ByteMaker(person.PinCode));
+      }
+      // Return CreatedAtRoute?
+      return Ok(person.PersonalNumber);
     }
     catch (Exception ex)
     {

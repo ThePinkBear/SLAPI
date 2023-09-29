@@ -12,8 +12,6 @@ public class BetsyPersonResponse
   public string? FirstName { get; set; }
   [JsonPropertyName("LastName")]
   public string? LastName { get; set; }
-  [JsonPropertyName("Department")]
-  public string? Department { get; set; }
-  // [JsonPropertyName("PinCode")]
-  // public string? PinCode { get; set; }
+  // [JsonPropertyName("Department")]
+  // public string? Department { get; set; }
 }

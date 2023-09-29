@@ -1,11 +1,7 @@
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-
 namespace Test.Models;
 
 public class Person
 {
-  [Key]
   [JsonPropertyName("PersonId")]
   public string PersonId { get; set; } = default!;
   [JsonPropertyName("PersonalNumber")]

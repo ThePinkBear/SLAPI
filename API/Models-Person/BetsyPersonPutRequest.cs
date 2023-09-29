@@ -1,8 +1,8 @@
 namespace Test.Models;
 
-public class BetsyPersonCreateRequest
+public class BetsyPersonPutRequest
 {
-    public string PersonalNumber { get; set; } = default!;
+    public string? PersonalNumber { get; set; } = default!;
     public string? FirstName { get; set; } = default!;
     public string? LastName { get; set; } = default!;
     public string? PinCode { get; set; } = default!;
