@@ -9,6 +9,7 @@ public class PersonsController : ControllerBase
   private readonly string? _personUrlStart;
   private readonly string? _personUrlEnd;
   private readonly string? _deleteUrl;
+  private readonly string? _createUrl;
 
   public PersonsController(IHttpClientFactory client, IConfiguration config)
   {
@@ -17,6 +18,7 @@ public class PersonsController : ControllerBase
     _personUrlStart = config.GetValue<string>("Url:rPersonStart");
     _personUrlEnd = config.GetValue<string>("Url:rPersonEnd");
     _deleteUrl = config.GetValue<string>("Url:DeletePerson");
+    _createUrl = config.GetValue<string>("Url:CreatePerson");
     _exosService = new ExosRepository();
   }
 
@@ -33,7 +35,7 @@ public class PersonsController : ControllerBase
         PersonalNumber = person.PersonBaseData.PersonalNumber,
         FirstName = person.PersonBaseData.FirstName,
         LastName = person.PersonBaseData.LastName
-        // Department = person.PersonTenantFreeFields.Department,
+        // Department = person.PersonTenantFreeFields.Text3
       };
 
       return personResponse == null ? NotFound() : Ok(personResponse);
@@ -50,36 +52,41 @@ public class PersonsController : ControllerBase
 
 
   [HttpPut]
-  public async Task<IActionResult> PutPerson(string personalNumber, BetsyPersonPutRequest person)
+  public async Task<IActionResult> PutPerson(string personalNumber, BetsyPersonPutRequest personRequest)
   {
+    if (String.IsNullOrEmpty(personalNumber) || personRequest == null) return BadRequest();
+
     var personToEdit = await GetPerson(personalNumber);
+    
     if (personToEdit.Result is NotFoundResult) return NotFound();
 
-    var result = ((OkObjectResult)personToEdit.Result!).Value as BetsyPersonResponse;
+    var personToEditValues = ((OkObjectResult)personToEdit.Result!).Value as BetsyPersonResponse;
 
     var UpdatedPerson = new ExosPersonRequest
     {
-      PersonBaseData = new PersonRequest
+      PersonBaseData = new PersonBaseData
       {
-        PersonalNumber = String.IsNullOrEmpty(person.PersonalNumber) ? result!.PersonalNumber : person.PersonalNumber!,
-        FirstName = String.IsNullOrEmpty(person.FirstName) ? result!.FirstName! : person.FirstName!,
-        LastName = String.IsNullOrEmpty(person.LastName) ? result!.LastName! : person.LastName!
+        PersonalNumber = IsChanged(personRequest.PersonalNumber, personToEditValues!.PersonalNumber),
+        FirstName = IsChanged(personRequest.FirstName, personToEditValues.FirstName),
+        LastName = IsChanged(personRequest.LastName, personToEditValues.LastName)
       }
       // PersonTenantFreeFields = new PersonTenantFreeFields
       // {
-      //   Department = person.Department
+      //   Text3 = IsChanged(personRequest.Department, personToEditValues.Department)
       // }
     };
 
-    if (person.PinCode != null) 
-    {
-      await _client.PostAsync($"{_url}/api/v1.0/persons/{result!.PersonId}/setPin", ByteMaker(person.PinCode ));
-    }
+
 
     try
     {
-      var response = await _client.PostAsync($"{_url}/api/v1.0/persons/{result!.PersonId}/update?ignoreBlacklist=false", ByteMaker(UpdatedPerson));
-      return Ok(person.PersonalNumber);
+      var response = await _client.PostAsync($"{_url}/api/v1.0/persons/{personToEditValues!.PersonId}/update?ignoreBlacklist=false", ByteMaker(UpdatedPerson));
+
+      if (!String.IsNullOrEmpty(personRequest.PinCode))
+      {
+        await _client.PostAsync($"{_url}/api/v1.0/persons/{personToEditValues!.PersonId}/setPin", ByteMaker(personRequest.PinCode));
+      }
+      return Ok(personRequest.PersonalNumber);
     }
     catch (Exception ex)
     {
@@ -90,21 +97,26 @@ public class PersonsController : ControllerBase
   [HttpPost]
   public async Task<ActionResult> PostPerson(BetsyPersonCreateRequest person)
   {
-    var createdPerson = new PersonRequest
+    var createdPerson = new PersonBaseData
     {
       PersonalNumber = person.PersonalNumber,
-      FirstName = person.FirstName?? "",
-      LastName = person.LastName?? ""
+      FirstName = person.FirstName ?? "",
+      LastName = person.LastName ?? ""
+    };
+    var personTenantFreeFields = new PersonTenantFreeFields
+    {
+      Text3 = person.Department
     };
     var exosPerson = new ExosPersonRequest
     {
-      PersonBaseData = createdPerson
+      PersonBaseData = createdPerson,
+      PersonTenantFreeFields = personTenantFreeFields
     };
     try
     {
-      var posted = await _client.PostAsync($"{_url}/api/v1.0/persons/create?ignoreblackList=false", ByteMaker(exosPerson));
+      var posted = await _client.PostAsync($"{_url}{_createUrl}", ByteMaker(exosPerson));
 
-      if ( posted.IsSuccessStatusCode && !String.IsNullOrEmpty(person.PinCode))
+      if (posted.IsSuccessStatusCode && !String.IsNullOrEmpty(person.PinCode))
       {
         var response = await GetPerson(person.PersonalNumber!);
         var result = ((OkObjectResult)response.Result!).Value as BetsyPersonResponse;
@@ -117,9 +129,7 @@ public class PersonsController : ControllerBase
     {
       return StatusCode(500, ex.Message);
     }
-
   }
-
 
   [HttpDelete("{personalNumber}")]
   public async Task<IActionResult> DeletePerson(string personalNumber)

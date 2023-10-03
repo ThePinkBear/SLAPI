@@ -1,13 +1,10 @@
 {
-  "@odata.count": 1,
-  "value": [
-    {
-      "BadgeName": "ApiCard1",
-      "Person": {
-        "PersonBaseData": {
-          "PersonalNumber": ""
-        }
-      }
-    }
-  ]
+  "PersonBaseData": {
+    "LastName": "ApiLastName",
+    "FirstName": "ApiFirstName",
+    "PersonalNumber": ""
+  },
+  "PersonTenantFreeFields": {
+    "Text3": ""
+  }
 }
