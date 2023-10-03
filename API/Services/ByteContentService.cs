@@ -12,6 +12,11 @@ public static class HelperMethods
   }
   public static string IsChanged(string? changed, string? original)
   {
-    return String.IsNullOrEmpty(changed) ? original: changed;
+    return String.IsNullOrEmpty(original) switch
+    {
+      true => !String.IsNullOrEmpty(changed) ? changed : "",
+      false => !String.IsNullOrEmpty(changed) ? changed : original
+    };
+    
   }
 }
