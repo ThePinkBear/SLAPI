@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Test.Models;
+using SLAPI.Models;
 
 public class PersonsContext : DbContext
 {

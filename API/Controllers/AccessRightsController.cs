@@ -29,7 +29,7 @@ public class AccessRightsController : ControllerBase
     try
     {
       var objectResult = await _exosService.GetExos(_client, $"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
-      var personId = JsonConvert.DeserializeObject<ExosPerson>(objectResult["value"]![0]!.ToString())!.PersonBaseData.PersonId;
+      var personId = JsonConvert.DeserializeObject<ExosPersonResponse>(objectResult["value"]![0]!.ToString())!.PersonBaseData.PersonId;
       var assignment = new ExosAssignmentRequest
       {
         AccessRightId = "",

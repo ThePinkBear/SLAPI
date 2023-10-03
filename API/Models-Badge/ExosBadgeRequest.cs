@@ -1,6 +1,4 @@
-using System.Text.Json.Serialization;
-
-namespace Test.Models;
+namespace SLAPI.Models;
 
 public class ExosBadgeRequest
 {

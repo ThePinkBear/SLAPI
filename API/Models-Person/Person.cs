@@ -1,4 +1,4 @@
-namespace Test.Models;
+namespace SLAPI.Models;
 
 public class Person
 {

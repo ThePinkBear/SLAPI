@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace Test.Models;
+namespace SLDB.Models;
 
 public class AccessPointDbObject
 {

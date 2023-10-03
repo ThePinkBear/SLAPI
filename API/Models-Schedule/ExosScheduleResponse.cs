@@ -1,7 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
-
-namespace Test.Models;
+namespace SLAPI.Models;
 
 public class ExosScheduleResponse
 {

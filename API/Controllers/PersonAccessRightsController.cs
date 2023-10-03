@@ -20,13 +20,13 @@ public class PersonController : ControllerBase
   }
 
   [HttpGet]
-  public ActionResult<List<BetsyAccessRightResponse>> GetPerson(string personalNumber)
+  public ActionResult<List<BetsyAccessRightResponse>> GetPersonAccessRights(string personalNumber)
   {
     var objectResponse = _exosService.GetExos(_client, $"{_url}{_personUrl1}{personalNumber}{_personUrl2}").Result;
 
     try
     {
-      var person = JsonConvert.DeserializeObject<ExosPerson>(objectResponse["value"]![0]!.ToString());
+      var person = JsonConvert.DeserializeObject<ExosPersonResponse>(objectResponse["value"]![0]!.ToString());
       var result = new List<BetsyAccessRightResponse>();
 
       result.AddRange(from accessRight in person?.PersonAccessControlData.accessRights

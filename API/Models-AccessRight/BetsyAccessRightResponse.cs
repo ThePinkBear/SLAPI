@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace Test.Models;
+namespace SLAPI.Models;
 
 public class BetsyAccessRightResponse
 {

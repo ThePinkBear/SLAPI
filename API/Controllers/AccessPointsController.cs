@@ -44,7 +44,6 @@ public class AccessPointsController : ControllerBase
     return accessPoints == null ? NotFound() : Ok(accessPoints);
   }
 
-  // TODO THe route in ExosApi "api/AccessPoints/{AccessPointId}/Open/{PrimaryId}" open seems hardcoded, ApId and PId is sent, only bool true or false returned dependant on modelstate.
   [HttpPut("{id}/open")]
   public async Task<IActionResult> PutAccessPoint(string id)
   {
