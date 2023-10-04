@@ -17,7 +17,7 @@ builder.Services.AddHttpClient("ExosClientDev", c =>
 {
   ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
 });
-builder.Services.AddDbContext<PersonsContext>(options =>
+builder.Services.AddDbContext<AccessContext>(options =>
 {
   options.UseSqlServer(builder.Configuration.GetConnectionString("Exos"));
 });

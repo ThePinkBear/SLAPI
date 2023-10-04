@@ -1,9 +1,6 @@
-using Microsoft.EntityFrameworkCore;
-using SLAPI.Models;
-
-public class PersonsContext : DbContext
+public class AccessContext : DbContext
 {
-  public PersonsContext(DbContextOptions<PersonsContext> options) : base(options) { }
+  public AccessContext(DbContextOptions<AccessContext> options) : base(options) { }
 
   public DbSet<PersonDbObject> Persons { get; set; } = default!;
   public DbSet<AccessPointDbObject> AccessPoints { get; set; } = default!;

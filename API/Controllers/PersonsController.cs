@@ -15,8 +15,8 @@ public class PersonsController : ControllerBase
   {
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
-    _personUrlStart = config.GetValue<string>("Url:rPersonStart");
-    _personUrlEnd = config.GetValue<string>("Url:rPersonEnd");
+    _personUrlStart = config.GetValue<string>("Url:GetOnePersonStart");
+    _personUrlEnd = config.GetValue<string>("Url:GetOnePersonEnd");
     _deleteUrl = config.GetValue<string>("Url:DeletePerson");
     _createUrl = config.GetValue<string>("Url:CreatePerson");
     _exosService = new ExosRepository();
@@ -28,16 +28,17 @@ public class PersonsController : ControllerBase
     try
     {
       var objectResult = await _exosService.GetExos(_client, $"{_url}{_personUrlStart}{personalNumber}{_personUrlEnd}");
-      var person = JsonConvert.DeserializeObject<ExosPersonResponse>(objectResult["value"]![0]!.ToString());
+      var person = JsonConvert.DeserializeObject<ExosPersonsResponse>(objectResult["value"]![0]!.ToString());
       var personResponse = new BetsyPersonResponse
       {
         PersonId = person!.PersonBaseData.PersonId,
         PersonalNumber = person.PersonBaseData.PersonalNumber,
         FirstName = person.PersonBaseData.FirstName,
-        LastName = person.PersonBaseData.LastName
-        // Department = person.PersonTenantFreeFields.Text3
+        LastName = person.PersonBaseData.LastName,
+        Department = person.PersonTenantFreeFields.Text3
       };
-
+ 
+      
       return personResponse == null ? NotFound() : Ok(personResponse);
     }
     catch (ArgumentOutOfRangeException)

@@ -8,4 +8,6 @@ public class BetsyAccessRightRequest
   public string PersonPrimaryId { get; set; } = default!;
   [Required]
   public string TimeZoneId { get; set; } = default!;
+  [Required]
+  public string AccessPointId { get; set; } = default!;
 }
