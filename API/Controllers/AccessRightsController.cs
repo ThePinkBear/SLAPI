@@ -34,8 +34,8 @@ public class AccessRightsController : ControllerBase
       var personId = JsonConvert.DeserializeObject<ExosPersonResponse>(objectResult["value"]![0]!.ToString())!.PersonBaseData.PersonId;
       var assignment = new ExosAssignmentRequest
       {
-        AccessRightId = _context.AccessRights.Where(x => x.AccessPointId == accessRight.AccessPointId).Select(x => x.Id.ToString()).FirstOrDefault(),
-        TimeZoneId = accessRight.TimeZoneId
+        // AccessRightId = _context.AccessRights.Where(x => x.AccessPointId == accessRight.AccessPointId).Select(x => x.Id.ToString()).FirstOrDefault(),
+        // TimeZoneId = accessRight.TimeZoneId
       };
       // TODO check with Exos what AccessRightID and TimeZoneID is available to the person based on the AdministrationArea they are assigned to and make a response object {AccessRightID, TimeZoneID}
       await _client.PostAsync($"{_url}{_accessRightUrl1}{personId}{_accessRightUrl2}", ByteMaker(assignment));

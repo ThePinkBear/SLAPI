@@ -19,7 +19,7 @@ public class PersonController : ControllerBase
     _exosService = new ExosRepository();
   }
 
-  [HttpGet]
+  [HttpGet("{personalNumber}")]
   public ActionResult<List<BetsyAccessRightResponse>> GetPersonAccessRights(string personalNumber)
   {
     var objectResponse = _exosService.GetExos(_client, $"{_url}{_personUrl1}{personalNumber}{_personUrl2}").Result;

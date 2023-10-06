@@ -22,7 +22,7 @@ public class PersonsController : ControllerBase
     _exosService = new ExosRepository();
   }
 
-  [HttpGet]
+  [HttpGet("{personalNumber}")]
   public async Task<ActionResult<BetsyPersonResponse>> GetPerson(string personalNumber)
   {
     try
@@ -70,14 +70,12 @@ public class PersonsController : ControllerBase
         PersonalNumber = IsChanged(personRequest.PersonalNumber, personToEditValues!.PersonalNumber),
         FirstName = IsChanged(personRequest.FirstName, personToEditValues.FirstName),
         LastName = IsChanged(personRequest.LastName, personToEditValues.LastName)
+      },
+      PersonTenantFreeFields = new PersonTenantFreeFields
+      {
+        Text3 = IsChanged(personRequest.Department, personToEditValues.Department)
       }
-      // PersonTenantFreeFields = new PersonTenantFreeFields
-      // {
-      //   Text3 = IsChanged(personRequest.Department, personToEditValues.Department)
-      // }
     };
-
-
 
     try
     {

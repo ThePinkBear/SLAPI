@@ -23,7 +23,7 @@ public class CardsController : ControllerBase
     _personClient = new PersonsController(client, config);
   }
 
-  [HttpGet]
+  [HttpGet("{badgeName?}")]
   public async Task<ActionResult<List<BetsyBadgeResponse>>> GetCard(string? badgeName)
   {
     try
