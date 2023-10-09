@@ -1,6 +1,7 @@
 global using System.Text.Json.Serialization;
 global using System.ComponentModel.DataAnnotations;
 global using Newtonsoft.Json;
+global using Newtonsoft.Json.Linq;
 global using Microsoft.AspNetCore.Mvc;
 global using SLAPI.Models;
 global using SLDB.Models;

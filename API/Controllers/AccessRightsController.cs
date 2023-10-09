@@ -16,13 +16,13 @@ public class AccessRightsController : ControllerBase
   public AccessRightsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
     _client = client.CreateClient("ExosClientDev");
+    _context = context;
     _url = config.GetValue<string>("ExosUrl");
     _accessRightUrl1 = config.GetValue<string>("Url:AssignAccessRightStart");
     _accessRightUrl2 = config.GetValue<string>("Url:AssignAccessRightEnd");
-    _repo = new ExosRepository();
     _personUrl1 = config.GetValue<string>("Url:rPersonStart");
     _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
-    _context = context;
+    _repo = new ExosRepository(_client, _context);
   }
 
   [HttpPost("{personalNumber}")]
@@ -30,7 +30,7 @@ public class AccessRightsController : ControllerBase
   {
     try
     {
-      var objectResult = await _repo.GetExos(_client, $"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
+      var objectResult = await _repo.GetExos($"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
       var personId = JsonConvert.DeserializeObject<ExosPersonResponse>(objectResult["value"]![0]!.ToString())!.PersonBaseData.PersonId;
       var assignment = new ExosAssignmentRequest
       {

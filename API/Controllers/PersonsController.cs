@@ -11,7 +11,7 @@ public class PersonsController : ControllerBase
   private readonly string? _deleteUrl;
   private readonly string? _createUrl;
 
-  public PersonsController(IHttpClientFactory client, IConfiguration config)
+  public PersonsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
@@ -19,7 +19,7 @@ public class PersonsController : ControllerBase
     _personUrlEnd = config.GetValue<string>("Url:GetOnePersonEnd");
     _deleteUrl = config.GetValue<string>("Url:DeletePerson");
     _createUrl = config.GetValue<string>("Url:CreatePerson");
-    _exosService = new ExosRepository();
+    _exosService = new ExosRepository(_client, context);
   }
 
   [HttpGet("{personalNumber}")]
@@ -27,7 +27,7 @@ public class PersonsController : ControllerBase
   {
     try
     {
-      var objectResult = await _exosService.GetExos(_client, $"{_url}{_personUrlStart}{personalNumber}{_personUrlEnd}");
+      var objectResult = await _exosService.GetExos($"{_url}{_personUrlStart}{personalNumber}{_personUrlEnd}");
       var person = JsonConvert.DeserializeObject<ExosPersonsResponse>(objectResult["value"]![0]!.ToString());
       var personResponse = new BetsyPersonResponse
       {

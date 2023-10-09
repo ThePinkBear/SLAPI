@@ -13,14 +13,14 @@ public class CardsController : ControllerBase
   private readonly string? _cardUrl2;
   private readonly ExosRepository _exosService;
 
-  public CardsController(IHttpClientFactory client, IConfiguration config)
+  public CardsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
     _cardUrl1 = config.GetValue<string>("Url:GetBadgeStart");
     _cardUrl2 = config.GetValue<string>("Url:GetBadgeEnd");
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
-    _exosService = new ExosRepository();
-    _personClient = new PersonsController(client, config);
+    _exosService = new ExosRepository(_client, context);
+    _personClient = new PersonsController(client, config, context);
   }
 
   [HttpGet("{badgeName?}")]
@@ -28,9 +28,7 @@ public class CardsController : ControllerBase
   {
     try
     {
-      // var cards = await _exosService.GetExos<ExosBadgeResponse>(_client, $"{_url}{_cardUrl1}{badgeName}{_cardUrl2}", "value");
-
-      var objectResult = await _exosService.GetExos(_client, $"{_url}/api/v1.0/badges?badgeName={badgeName}");
+      var objectResult = await _exosService.GetExos($"{_url}/api/v1.0/badges?badgeName={badgeName}");
       var card = JsonConvert.DeserializeObject<ExosBadgeResponse>(objectResult["value"]![0]!.ToString());
 
       var cardResponse =  new BetsyBadgeResponse

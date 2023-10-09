@@ -15,14 +15,14 @@ public class AccessPointsController : ControllerBase
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
     _accessPointUrl = config.GetValue<string>("Url:AccessPoint");
-    _repo = new ExosRepository();
+    _repo = new ExosRepository(_client, context);
     _context = context;
   }
 
   [HttpGet("{accessPointId?}")]
   public async Task<ActionResult<List<BetsyAccessPointResponse>>> GetAccessPoints(string? accessPointId)
   {
-    var devices = await _repo.GetExos<AccessPoint>(_client, $"{_url}{_accessPointUrl}", "Value", "Devices");
+    var devices = await _repo.GetExos<AccessPoint>($"{_url}{_accessPointUrl}", "Value", "Devices");
 
     var accessPoints =
       from device in devices

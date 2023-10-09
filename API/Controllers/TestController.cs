@@ -14,7 +14,7 @@ public class TestController : ControllerBase
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
     _scheduleUrl = config.GetValue<string>("Url:Schedule");
-    _exosService = new ExosRepository();
+    _exosService = new ExosRepository(_client, context);
     _context = context;
   }
 
@@ -26,39 +26,17 @@ public class TestController : ControllerBase
   [HttpGet("AccessRights")]
   public List<BetsyAccessRightResponse> GetDBAccessRights()
   {
-    var accessRights = _context.AccessRights;
-
-    var result = from accessRight in accessRights select new BetsyAccessRightResponse {
-      PersonPrimaryId = accessRight.PersonPrimaryId,
-      AccessPointId = accessRight.AccessPointId,
-      ScheduleId = accessRight.ScheduleId,
-      AccessRightId = accessRight.UniqueId
-     };
-
-    return result.ToList();
+    return _exosService.ExosDbGetAccessRights();
   }
   [HttpPost]
   public async Task<ActionResult> PostAccessRight(BetsyAccessRightRequest request)
   {
-    var newAr = new AccessRightDbObject
-    {
-      UniqueId = Guid.NewGuid().ToString(),
-      PersonPrimaryId = request.PersonPrimaryId,
-      ScheduleId = request.TimeZoneId,
-      AccessPointId = request.AccessPointId
-    };
-
-    _context.AccessRights.Add(newAr);
-
-    await _context.SaveChangesAsync();
-    return Ok(newAr.UniqueId);
+    return Ok(await _exosService.ExosPostAccessRightDb(request));
   }
   [HttpDelete]
-  public async Task<ActionResult> DeleteDbAccessRight(string id)
+  public ActionResult DeleteDbAccessRight(string id)
   {
-    var accessRight = _context.AccessRights.Where(a => a.UniqueId == id).First();
-    _context.AccessRights.Remove(accessRight);
-    await _context.SaveChangesAsync();
+    _exosService.ExosDeletAccessRight(id);
     return NoContent();
   }
 

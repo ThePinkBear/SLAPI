@@ -10,19 +10,19 @@ public class PersonController : ControllerBase
   private readonly string? _personUrl2;
   private readonly ExosRepository _exosService;
 
-  public PersonController(IHttpClientFactory client, IConfiguration config)
+  public PersonController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
     _personUrl1 = config.GetValue<string>("Url:rPersonStart");
     _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
-    _exosService = new ExosRepository();
+    _exosService = new ExosRepository(_client, context);
   }
 
   [HttpGet("{personalNumber}")]
   public ActionResult<List<BetsyAccessRightResponse>> GetPersonAccessRights(string personalNumber)
   {
-    var objectResponse = _exosService.GetExos(_client, $"{_url}{_personUrl1}{personalNumber}{_personUrl2}").Result;
+    var objectResponse = _exosService.GetExos($"{_url}{_personUrl1}{personalNumber}{_personUrl2}").Result;
 
     try
     {
