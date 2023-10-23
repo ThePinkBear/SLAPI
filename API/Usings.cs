@@ -6,3 +6,7 @@ global using Microsoft.AspNetCore.Mvc;
 global using SLAPI.Models;
 global using SLDB.Models;
 global using static HelperMethods;
+global using System.IO;
+global using Serilog;
+global using Serilog.Events;
+global using Serilog.Extensions.Hosting;

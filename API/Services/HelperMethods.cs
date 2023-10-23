@@ -1,6 +1,4 @@
 using System.Net.Http.Headers;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Newtonsoft.Json;
 
 public static class HelperMethods
 {

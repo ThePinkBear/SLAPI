@@ -1,5 +1,4 @@
-using System.Net.Http.Headers;
-using NuGet.Protocol;
+using System.Data;
 
 public class ExosRepository
 {
@@ -66,5 +65,33 @@ public class ExosRepository
     var accessRight = _context.AccessRights.Where(a => a.UniqueId == id).First();
     _context.AccessRights.Remove(accessRight);
     await _context.SaveChangesAsync();
+  }
+  public async Task<BetsyAccessRightResponse> ExosPutAccessRight(int id, BetsyAccessRightRequest request)
+  {
+    var accessRight = await _context.AccessRights.Where(x => x.AccessRightId == id).FirstOrDefaultAsync();
+    var modification = new AccessRightDbObject
+    {
+      AccessPointId = IsChanged(request.AccessPointId, accessRight?.AccessPointId),
+      PersonPrimaryId = IsChanged(request.PersonPrimaryId, accessRight?.PersonPrimaryId),
+      ScheduleId = IsChanged(request.TimeZoneId, accessRight?.ScheduleId)
+    };
+    try
+    {
+      _context.AccessRights.Update(modification);
+      await _context.SaveChangesAsync();
+    }
+    catch (DBConcurrencyException ex)
+    {
+      Console.WriteLine(ex.Message);
+    }
+
+    var response = new BetsyAccessRightResponse
+    {
+      AccessPointId = modification.AccessPointId,
+      PersonPrimaryId = modification.PersonPrimaryId,
+      ScheduleId = modification.ScheduleId
+    };
+
+    return response;
   }
 }

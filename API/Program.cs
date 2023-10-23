@@ -1,9 +1,18 @@
 global using Microsoft.EntityFrameworkCore;
 
 
+string path = @"C:\inetpub\wwwroot\SLAPI\LOGS\Output.txt";
 var builder = WebApplication.CreateBuilder(args);
-// Add services to the container.
 
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .WriteTo.File(path, rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+// Add services to the container.
+builder.Host.UseSerilog(); // Use Serilog as the logging framework
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -35,3 +44,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
