@@ -8,15 +8,17 @@ public class PersonController : ControllerBase
   private readonly string? _url;
   private readonly string? _personUrl1;
   private readonly string? _personUrl2;
+  private readonly ILogger<AccessPointsController> _logger;
   private readonly ExosRepository _exosService;
 
-  public PersonController(IHttpClientFactory client, IConfiguration config, AccessContext context)
+  public PersonController(IHttpClientFactory client, IConfiguration config, AccessContext context, ILogger<AccessPointsController> logger)
   {
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
     _personUrl1 = config.GetValue<string>("Url:rPersonStart");
     _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
     _exosService = new ExosRepository(_client, context);
+    _logger = logger;
   }
 
   [HttpGet("{personalNumber}")]

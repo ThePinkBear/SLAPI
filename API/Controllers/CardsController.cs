@@ -11,16 +11,18 @@ public class CardsController : ControllerBase
   private readonly string? _url;
   private readonly string? _cardUrl1;
   private readonly string? _cardUrl2;
+  private readonly ILogger<AccessPointsController> _logger;
   private readonly ExosRepository _exosService;
 
-  public CardsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
+  public CardsController(IHttpClientFactory client, IConfiguration config, AccessContext context, ILogger<AccessPointsController> logger)
   {
     _cardUrl1 = config.GetValue<string>("Url:GetBadgeStart");
     _cardUrl2 = config.GetValue<string>("Url:GetBadgeEnd");
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
     _exosService = new ExosRepository(_client, context);
-    _personClient = new PersonsController(client, config, context);
+    _personClient = new PersonsController(client, config, context, logger);
+    _logger = logger;
   }
 
   [HttpGet("{badgeName?}")]

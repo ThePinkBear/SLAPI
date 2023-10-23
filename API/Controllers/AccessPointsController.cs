@@ -9,23 +9,22 @@ public class AccessPointsController : ControllerBase
   private readonly HttpClient _client;
   private readonly string? _url;
   private readonly string? _accessPointUrl;
-  // private readonly AccessContext _context;
-  // private readonly ILogger<AccessPointsController> _logger;
+  private readonly ILogger<AccessPointsController> _logger;
+  private readonly AccessContext _context;
 
-  public AccessPointsController(IHttpClientFactory client, IConfiguration config, AccessContext context/*, ILogger<AccessPointsController> logger*/)
+  public AccessPointsController(IHttpClientFactory client, IConfiguration config, AccessContext context, ILogger<AccessPointsController> logger)
   {
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
     _accessPointUrl = config.GetValue<string>("Url:AccessPoint");
     _repo = new ExosRepository(_client, context);
-    // _context = context;
-    // _logger = logger;
+    _logger = logger;
+    _context = context;
   }
 
   [HttpGet("{accessPointId?}")]
   public async Task<ActionResult<List<BetsyAccessPointResponse>>> GetAccessPoints(string? accessPointId = "")
   {
-    // _logger.LogInformation("This is an info log message.");
     var devices = await _repo.GetExos<AccessPoint>($"{_url}{_accessPointUrl}", "Value", "Devices");
 
     var accessPoints =
