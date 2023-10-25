@@ -10,9 +10,8 @@ public class PersonsController : ControllerBase
   private readonly string? _personUrlEnd;
   private readonly string? _deleteUrl;
   private readonly string? _createUrl;
-  private readonly ILogger<AccessPointsController> _logger;
 
-  public PersonsController(IHttpClientFactory client, IConfiguration config, AccessContext context, ILogger<AccessPointsController> logger)
+  public PersonsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
@@ -21,7 +20,6 @@ public class PersonsController : ControllerBase
     _deleteUrl = config.GetValue<string>("Url:DeletePerson");
     _createUrl = config.GetValue<string>("Url:CreatePerson");
     _exosService = new ExosRepository(_client, context);
-    _logger = logger;
   }
 
   [HttpGet("{personalNumber}")]
@@ -123,7 +121,6 @@ public class PersonsController : ControllerBase
         var result = ((OkObjectResult)response.Result!).Value as BetsyPersonResponse;
         await _client.PostAsync($"{_url}/api/v1.0/persons/{result!.PersonId}/setPin", ByteMaker(person.PinCode));
       }
-      // Return CreatedAtRoute?
       return Ok(person.PersonalNumber);
     }
     catch (Exception ex)

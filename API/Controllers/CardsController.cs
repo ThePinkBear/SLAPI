@@ -9,20 +9,14 @@ public class CardsController : ControllerBase
   private static PersonsController _personClient = default!;
   private readonly HttpClient _client;
   private readonly string? _url;
-  private readonly string? _cardUrl1;
-  private readonly string? _cardUrl2;
-  private readonly ILogger<AccessPointsController> _logger;
   private readonly ExosRepository _exosService;
 
-  public CardsController(IHttpClientFactory client, IConfiguration config, AccessContext context, ILogger<AccessPointsController> logger)
+  public CardsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
-    _cardUrl1 = config.GetValue<string>("Url:GetBadgeStart");
-    _cardUrl2 = config.GetValue<string>("Url:GetBadgeEnd");
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
     _exosService = new ExosRepository(_client, context);
-    _personClient = new PersonsController(client, config, context, logger);
-    _logger = logger;
+    _personClient = new PersonsController(client, config, context);
   }
 
   [HttpGet("{badgeName?}")]
@@ -43,7 +37,7 @@ public class CardsController : ControllerBase
     }
     catch (Exception ex)
     {
-      return Ok(ex.Message);
+      return BadRequest(ex.Message);
     }
   }
 
@@ -78,9 +72,9 @@ public class CardsController : ControllerBase
       }
       return NoContent();
     }
-    catch (Exception)
+    catch (Exception ex)
     {
-      return BadRequest();
+      return BadRequest(ex.Message);
     }
   }
 

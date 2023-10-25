@@ -10,11 +10,10 @@ public class AccessRightsController : ControllerBase
   private readonly string? _accessRightUrl2;
   private readonly string? _personUrl1;
   private readonly string? _personUrl2;
-  private readonly ILogger<AccessPointsController> _logger;
   private readonly AccessContext _context;
   private readonly ExosRepository _repo;
 
-  public AccessRightsController(IHttpClientFactory client, IConfiguration config, AccessContext context, ILogger<AccessPointsController> logger)
+  public AccessRightsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
     _client = client.CreateClient("ExosClientDev");
     _context = context;
@@ -24,7 +23,6 @@ public class AccessRightsController : ControllerBase
     _personUrl1 = config.GetValue<string>("Url:rPersonStart");
     _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
     _repo = new ExosRepository(_client, _context);
-    _logger = logger;
   }
 
   [HttpPost("{personalNumber}")]

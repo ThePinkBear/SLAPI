@@ -30,6 +30,12 @@ public class TestController : ControllerBase
   {
     return _exosService.ExosDbGetAccessRights();
   }
+  [HttpGet("requestMigrations")]
+  public ActionResult Migrations()
+  {
+    HelperMethods.RunMigration();
+    return Ok("Migration Complete");
+  }
   [HttpPost]
   public async Task<ActionResult> PostAccessRight(BetsyAccessRightRequest request)
   {
@@ -38,9 +44,8 @@ public class TestController : ControllerBase
   [HttpDelete]
   public ActionResult DeleteDbAccessRight(string id)
   {
-    _exosService.ExosDeletAccessRight(id);
+    _exosService.ExosDeleteAccessRight(id);
     return NoContent();
   }
-
 }
 

@@ -9,21 +9,19 @@ public class AccessPointsController : ControllerBase
   private readonly HttpClient _client;
   private readonly string? _url;
   private readonly string? _accessPointUrl;
-  private readonly ILogger<AccessPointsController> _logger;
   private readonly AccessContext _context;
 
-  public AccessPointsController(IHttpClientFactory client, IConfiguration config, AccessContext context, ILogger<AccessPointsController> logger)
+  public AccessPointsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
     _accessPointUrl = config.GetValue<string>("Url:AccessPoint");
     _repo = new ExosRepository(_client, context);
-    _logger = logger;
     _context = context;
   }
 
-  [HttpGet("{accessPointId?}")]
-  public async Task<ActionResult<List<BetsyAccessPointResponse>>> GetAccessPoints(string? accessPointId = "")
+  [HttpGet]
+  public async Task<ActionResult<List<BetsyAccessPointResponse>>> GetAccessPoints([FromQuery] string? accessPointId = null)
   {
     var devices = await _repo.GetExos<AccessPoint>($"{_url}{_accessPointUrl}", "Value", "Devices");
 
@@ -39,7 +37,7 @@ public class AccessPointsController : ControllerBase
     if (!String.IsNullOrEmpty(accessPointId))
     {
       var accessPoint = accessPoints
-                      .Where(x => x.AccessPointId == accessPointId)
+                      .Where(x => x.AccessPointId.ToLower() == accessPointId.ToLower())
                       .Select(x => x).FirstOrDefault();
       return accessPoint == null
                         ? NotFound()

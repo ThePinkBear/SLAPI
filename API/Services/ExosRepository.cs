@@ -60,7 +60,7 @@ public class ExosRepository
     await _context.SaveChangesAsync();
     return newAr.UniqueId;
   }
-  public async void ExosDeletAccessRight(string id)
+  public async void ExosDeleteAccessRight(string id)
   {
     var accessRight = _context.AccessRights.Where(a => a.UniqueId == id).First();
     _context.AccessRights.Remove(accessRight);
