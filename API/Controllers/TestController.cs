@@ -4,20 +4,17 @@ namespace SLAPI.Controllers;
 public class TestController : ControllerBase
 {
   private readonly HttpClient _client;
-  private readonly string? _url;
-  private readonly string? _scheduleUrl;
-  private readonly ILogger<AccessPointsController> _logger;
+
   private readonly ExosRepository _exosService;
+  private readonly ILogger<AccessPointsController> _logger;
   private readonly AccessContext _context;
 
-  public TestController(IHttpClientFactory client, IConfiguration config, AccessContext context, ILogger<AccessPointsController> logger)
+  public TestController(IHttpClientFactory client, AccessContext context, ILogger<AccessPointsController> logger)
   {
     _client = client.CreateClient("ExosClientDev");
-    _url = config.GetValue<string>("ExosUrl");
-    _scheduleUrl = config.GetValue<string>("Url:Schedule");
     _exosService = new ExosRepository(_client, context);
-    _context = context;
     _logger = logger;
+    _context = context;
   }
 
   [HttpGet]
@@ -33,7 +30,10 @@ public class TestController : ControllerBase
   [HttpGet("requestMigrations")]
   public ActionResult Migrations()
   {
-    HelperMethods.RunMigration();
+    using (var db = _context)
+    {
+      db.Database.Migrate();
+    }
     return Ok("Migration Complete");
   }
   [HttpPost]

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(AccessContext))]
-    [Migration("20231006120455_AccessRightDBUpdate")]
-    partial class AccessRightDBUpdate
+    [Migration("20231026135126_Initial Create")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -62,8 +62,9 @@ namespace API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UniqueId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UniqueId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("ValidFrom")
                         .HasColumnType("datetime2");

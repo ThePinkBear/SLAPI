@@ -28,17 +28,18 @@ namespace API.Migrations
                 name: "AccessRights",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    AccessRightId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    UniqueId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PersonPrimaryId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AccessPointId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ScheduleId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ValidFrom = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ValidTo = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    ValidFrom = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ValidTo = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AccessRights", x => x.Id);
+                    table.PrimaryKey("PK_AccessRights", x => x.AccessRightId);
                 });
 
             migrationBuilder.CreateTable(

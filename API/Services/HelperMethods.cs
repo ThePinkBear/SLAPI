@@ -18,26 +18,4 @@ public static class HelperMethods
     };
 
   }
-  public static void RunMigration()
-  {
-    ProcessStartInfo startInfo = new ProcessStartInfo
-    {
-      FileName = "dotnet",
-      Arguments = "ef database update",
-      RedirectStandardOutput = true,
-      UseShellExecute = false,
-      CreateNoWindow = true,
-    };
-
-    using (Process process = new Process { StartInfo = startInfo })
-    {
-      process.Start();
-
-      // Read the output to console (optional)
-      string result = process.StandardOutput.ReadToEnd();
-      Console.WriteLine(result);
-
-      process.WaitForExit();
-    }
-  }
 }
