@@ -12,7 +12,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 // Add services to the container.
-builder.Host.UseSerilog(); // Use Serilog as the logging framework
+// builder.Host.UseSerilog(); // Use Serilog as the logging framework
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

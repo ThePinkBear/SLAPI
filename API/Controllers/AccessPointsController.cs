@@ -9,6 +9,7 @@ public class AccessPointsController : ControllerBase
   private readonly HttpClient _client;
   private readonly string? _url;
   private readonly string? _accessPointUrl;
+  private readonly AccessContext _context;
 
   public AccessPointsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
@@ -16,6 +17,7 @@ public class AccessPointsController : ControllerBase
     _url = config.GetValue<string>("ExosUrl");
     _accessPointUrl = config.GetValue<string>("Url:AccessPoint");
     _repo = new ExosRepository(_client, context);
+    _context = context;
   }
 
   [HttpGet]

@@ -32,9 +32,10 @@ public class PersonController : ControllerBase
       result.AddRange(from accessRight in person?.PersonAccessControlData.accessRights
                       select new BetsyAccessRightResponse()
                       {
-                        AccessPointId = accessRight.BadgeId,
-                        PersonPrimaryId = accessRight.BadgeName,
-                        ScheduleId = accessRight.TimeZoneIdInternal
+                        AccessRightId = accessRight.AssignmentId,
+                        AccessPointId = accessRight.AccessRightId,
+                        PersonPrimaryId = person!.PersonBaseData.PersonId,
+                        ScheduleId = accessRight.TimeZoneId
                       });
 
       return Ok(result);

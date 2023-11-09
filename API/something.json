@@ -1,26 +1,53 @@
-
-{  
-  "ExosUrl": "https://exosserver/ExosApi",
-  "Connectionstrings": {
-    "Exos": "Server=SESTOM00158;Database=SLdb;User Id=sa;Password=6QuENQj9!;TrustServerCertificate=True;"
-  },
-  "Url": {
-    "AccessPoint": "/sysops/v1.0/peripheryStatusList?componentType=Online&skip=0&take=50&orderBy=DeviceAddressAscending&filterDevicesWithAlarm=false",
-    "AccessRight": "/api/v1.0/accessRights?%24count=true&%24top=1000",
-    "Card": "/api/v1.0/badges?%24count=true&%24top=1000",
-    "Person": "/api/v1.0/persons?personType=All&%24count=true&%24top=1000&searchStringLogic=SelectedFields",
-    "CreatePerson": "/api/v1.1/persons/create?ignoreBlacklist=false",
-    "DeletePerson": "/api/v1.1/persons/",
-    "rPersonStart": "/api/v1.0/persons?personType=All&%24expand=PersonBaseData%2C%20PersonAccessControlData%28%24expand%3DAccessRights%28%24expand%3DAccessRight%29%29&%24filter=PersonBaseData%2FPersonalNumber%20eq%20%27",
-    "rPersonEnd" : "%27&%24count=true&%24top=1000&searchStringLogic=SelectedFields",
-    "GetOnePersonStart": "/api/v1.0/persons?personType=All&%24expand=PersonBaseData%2C%20PersonTenantFreeFields&%24filter=PersonBaseData%2FPersonalNumber%20%20eq%20%27",
-    "GetOnePersonEnd": "%27&%24count=true&%24top=1000&searchStringLogic=SelectedFields",
-    "SetPinStart": "/api/v1.0/persons/b4847a39-a03f-42fd-87d5-36b3b3c8e6fd",
-    "SetPinEnd": "/setPin",
-    "Schedule": "/api/v1.0/timeZones?%24count=true&%24top=1000",
-    "GetBadgeStart": "/api/v1.0/badges?%24expand=MediaUsageData%2CPerson&%24filter=BadgeName%20eq%20%27",
-    "GetBadgeEnd": "%27&%24count=false&%24top=1000",
-    "AssignAccessRightStart": "/api/v1.1/persons/",
-    "AssignAccessRightEnd": "/assignAccessRight"
-  }
+{
+  "value": [
+    {
+      "PersonBaseData": {
+        "PersonId": "",
+        "LastName": "ApiLastName",
+        "FirstName": "ApiFirstName",
+        "PersonalNumber": ""
+       
+      },
+      "PersonAccessControlData": {
+        "AccessRights": [
+          {
+            "AssignmentId": "Assignment1",
+            "AccessRightId": "",
+            "TimeAccessRightId1ZoneId": "TimeZoneId1",
+            "ValidFrom": "2001-01-31T11:55:00.000",
+            "ValidTo": "2001-01-31T11:55:00.000",
+            "Comment": "",
+            "AccessRight": {
+              "AccessRightId": "AccessRightId1",
+              "DisplayName": "Profile 1",
+              "Comment": "",
+              "ValidFrom": "2001-01-31T11:55:00.000",
+              "ValidTo": "2001-01-31T11:55:00.000"
+            },
+            "TimeZone": {
+              "TimeZoneId": "TimeZoneId1",
+              "DisplayName": "Time zone 1",
+              "Comment": ""
+            }
+          }
+        ]
+      },
+      "PersonTenantFreeFields": {
+        "PersonIdInternal": 1,
+        "Text1": "",
+        "Text2": "",
+        "Text3": ""
+      },
+      "Badge": [
+        {
+          "BadgeId": "",
+          "BadgeName": "ApiCard1",
+          "Comment": "",
+          "LastChangeDate": "2001-01-31T11:55:00.000",
+          "ValidFrom": "2001-01-31T11:55:00.000",
+          "ValidTo": "2001-01-31T11:55:00.000"
+        }
+      ]
+    }
+  ]
 }

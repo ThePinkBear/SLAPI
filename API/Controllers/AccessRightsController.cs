@@ -25,6 +25,34 @@ public class AccessRightsController : ControllerBase
     _repo = new ExosRepository(_client, _context);
   }
 
+  [HttpGet]
+  public async Task<ActionResult<List<BetsyAccessRightResponse>>> HourlyGetAccessRights()
+  {
+    var accessRightIds = await _repo.GetExos<ExosAccessRightResponse>("https://exosserver/ExosApi/api/v1.0/accessRights?%24count=true&%24top=1000", "value");
+
+    Dictionary<string, string> ArIdTzId = new();
+
+    foreach (var ar in accessRightIds)
+    {
+      var ar2 = await _repo.GetExos<ExosScheduleResponse>($"https://exosserver/ExosApi/api/v1.0/timeZones?accessRightId={ar.AccessRightId}&%24count=true&%24top=4", "value");
+
+      ArIdTzId.Add(ar.DisplayName, ar2[0].TimeZoneId);
+    }
+
+    List<BetsyAccessRightResponse> accessRights = new();
+
+    foreach (var ar in accessRightIds)
+    {
+      accessRights.Add(new BetsyAccessRightResponse
+      {
+        AccessRightId = ar.AccessRightId,
+        AccessPointId = ar.DisplayName,
+        ScheduleId = ArIdTzId[ar.DisplayName]
+      });
+    }
+    return Ok(accessRights);
+  }
+
   [HttpPost("{personalNumber}")]
   public async Task<ActionResult> AssignAccessRight(string personalNumber, BetsyAccessRightRequest accessRight)
   {
@@ -34,10 +62,10 @@ public class AccessRightsController : ControllerBase
       var personId = JsonConvert.DeserializeObject<ExosPersonResponse>(objectResult["value"]![0]!.ToString())!.PersonBaseData.PersonId;
       var assignment = new ExosAssignmentRequest
       {
-        // AccessRightId = _context.AccessRights.Where(x => x.AccessPointId == accessRight.AccessPointId).Select(x => x.Id.ToString()).FirstOrDefault(),
-        // TimeZoneId = accessRight.TimeZoneId
+        AccessRightId = accessRight.AccessPointId,
+        TimeZoneId = accessRight.TimeZoneId
       };
-      // TODO check with Exos what AccessRightID and TimeZoneID is available to the person based on the AdministrationArea they are assigned to and make a response object {AccessRightID, TimeZoneID}
+      
       await _client.PostAsync($"{_url}{_accessRightUrl1}{personId}{_accessRightUrl2}", ByteMaker(assignment));
       return Ok(personId);
     }
@@ -50,5 +78,6 @@ public class AccessRightsController : ControllerBase
       return StatusCode(500, ex.Message);
     }
   }
+
 }
 
