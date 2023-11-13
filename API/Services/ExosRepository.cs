@@ -30,68 +30,68 @@ public class ExosRepository
     var response = await _client.GetAsync(url);
     return JObject.Parse(await response.Content.ReadAsStringAsync());
   }
-  public List<BetsyAccessRightResponse> ExosDbGetAccessRights()
-  {
-    var accessRights = _context.AccessRights;
+  // public List<BetsyAccessRightResponse> ExosDbGetAccessRights()
+  // {
+  //   var accessRights = _context.AccessRights;
 
-    var result = from accessRight in accessRights
-                 select new BetsyAccessRightResponse
-                 {
-                   PersonPrimaryId = accessRight.PersonPrimaryId,
-                   AccessPointId = accessRight.AccessPointId,
-                   ScheduleId = accessRight.ScheduleId,
-                   AccessRightId = accessRight.UniqueId
-                 };
+  //   var result = from accessRight in accessRights
+  //                select new BetsyAccessRightResponse
+  //                {
+  //                  PersonPrimaryId = accessRight.PersonPrimaryId,
+  //                  AccessPointId = accessRight.AccessPointId,
+  //                  ScheduleId = accessRight.ScheduleId,
+  //                  AccessRightId = accessRight.UniqueId
+  //                };
 
-    return result.ToList();
-  }
-  public async Task<string> ExosPostAccessRightDb(BetsyAccessRightRequest request)
-  {
-    var newAr = new AccessRightDbObject
-    {
-      UniqueId = Guid.NewGuid().ToString(),
-      PersonPrimaryId = request.PersonPrimaryId,
-      ScheduleId = request.TimeZoneId,
-      AccessPointId = request.AccessPointId
-    };
+  //   return result.ToList();
+  // }
+  // public async Task<string> ExosPostAccessRightDb(BetsyAccessRightRequest request)
+  // {
+  //   var newAr = new AccessRightDbObject
+  //   {
+  //     UniqueId = Guid.NewGuid().ToString(),
+  //     PersonPrimaryId = request.PersonPrimaryId,
+  //     ScheduleId = request.TimeZoneId,
+  //     AccessPointId = request.AccessPointId
+  //   };
 
-    _context.AccessRights.Add(newAr);
+  //   _context.AccessRights.Add(newAr);
 
-    await _context.SaveChangesAsync();
-    return newAr.UniqueId;
-  }
-  public async void ExosDeleteAccessRight(string id)
-  {
-    var accessRight = _context.AccessRights.Where(a => a.UniqueId == id).First();
-    _context.AccessRights.Remove(accessRight);
-    await _context.SaveChangesAsync();
-  }
-  public async Task<BetsyAccessRightResponse> ExosPutAccessRight(int id, BetsyAccessRightRequest request)
-  {
-    var accessRight = await _context.AccessRights.Where(x => x.AccessRightId == id).FirstOrDefaultAsync();
-    var modification = new AccessRightDbObject
-    {
-      AccessPointId = IsChanged(request.AccessPointId, accessRight?.AccessPointId),
-      PersonPrimaryId = IsChanged(request.PersonPrimaryId, accessRight?.PersonPrimaryId),
-      ScheduleId = IsChanged(request.TimeZoneId, accessRight?.ScheduleId)
-    };
-    try
-    {
-      _context.AccessRights.Update(modification);
-      await _context.SaveChangesAsync();
-    }
-    catch (DBConcurrencyException ex)
-    {
-      Console.WriteLine(ex.Message);
-    }
+  //   await _context.SaveChangesAsync();
+  //   return newAr.UniqueId;
+  // }
+  // public async void ExosDeleteAccessRight(string id)
+  // {
+  //   var accessRight = _context.AccessRights.Where(a => a.UniqueId == id).First();
+  //   _context.AccessRights.Remove(accessRight);
+  //   await _context.SaveChangesAsync();
+  // }
+  // public async Task<BetsyAccessRightResponse> ExosPutAccessRight(int id, BetsyAccessRightRequest request)
+  // {
+  //   var accessRight = await _context.AccessRights.Where(x => x.AccessRightId == id).FirstOrDefaultAsync();
+  //   var modification = new AccessRightDbObject
+  //   {
+  //     AccessPointId = IsChanged(request.AccessPointId, accessRight?.AccessPointId),
+  //     PersonPrimaryId = IsChanged(request.PersonPrimaryId, accessRight?.PersonPrimaryId),
+  //     ScheduleId = IsChanged(request.TimeZoneId, accessRight?.ScheduleId)
+  //   };
+  //   try
+  //   {
+  //     _context.AccessRights.Update(modification);
+  //     await _context.SaveChangesAsync();
+  //   }
+  //   catch (DBConcurrencyException ex)
+  //   {
+  //     Console.WriteLine(ex.Message);
+  //   }
 
-    var response = new BetsyAccessRightResponse
-    {
-      AccessPointId = modification.AccessPointId,
-      PersonPrimaryId = modification.PersonPrimaryId,
-      ScheduleId = modification.ScheduleId
-    };
+  //   var response = new BetsyAccessRightResponse
+  //   {
+  //     AccessPointId = modification.AccessPointId,
+  //     PersonPrimaryId = modification.PersonPrimaryId,
+  //     ScheduleId = modification.ScheduleId
+  //   };
 
-    return response;
-  }
+  //   return response;
+  // }
 }

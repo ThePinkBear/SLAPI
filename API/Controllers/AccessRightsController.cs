@@ -12,6 +12,7 @@ public class AccessRightsController : ControllerBase
   private readonly string? _personUrl2;
   private readonly AccessContext _context;
   private readonly ExosRepository _repo;
+  private readonly PersonsController _person;
 
   public AccessRightsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
@@ -23,6 +24,7 @@ public class AccessRightsController : ControllerBase
     _personUrl1 = config.GetValue<string>("Url:rPersonStart");
     _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
     _repo = new ExosRepository(_client, _context);
+    _person = new PersonsController(client, config, context);
   }
 
   [HttpGet]
@@ -77,6 +79,17 @@ public class AccessRightsController : ControllerBase
     {
       return StatusCode(500, ex.Message);
     }
+  }
+  [HttpDelete]
+  public async Task<ActionResult> DeleteAccessRight(string assignmentId)
+  {
+    string personId = _context.Requests.Where(r => r.AssignMentId == assignmentId).Select(p => p.PersonId).ToString();
+
+
+    var path = $"https://exosserver/ExosApi/api/v1.1/persons/{personId}/unassignAccessRight/{assignmentId}";
+
+    await _client.PostAsync(path, ByteMaker(""));
+    return Ok();
   }
 
 }

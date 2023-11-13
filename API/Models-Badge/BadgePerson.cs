@@ -2,6 +2,6 @@ namespace SLAPI.Models;
 
 public class BadgePerson
 {
-  [JsonPropertyName("PersonalNumber")]
+  [JsonPropertyName("PersonId")]
   public string PersonalNumber { get; set; } = default!;
 }

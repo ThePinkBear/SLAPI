@@ -22,11 +22,11 @@ public class TestController : ControllerBase
   {
     return "Hello World";
   }
-  [HttpGet("AccessRights")]
-  public List<BetsyAccessRightResponse> GetDBAccessRights()
-  {
-    return _exosService.ExosDbGetAccessRights();
-  }
+  // [HttpGet("AccessRights")]
+  // public List<BetsyAccessRightResponse> GetDBAccessRights()
+  // {
+  //   return _exosService.ExosDbGetAccessRights();
+  // }
   [HttpGet("requestMigrations")]
   public ActionResult Migrations()
   {
@@ -35,17 +35,6 @@ public class TestController : ControllerBase
       db.Database.Migrate();
     }
     return Ok("Migration Complete");
-  }
-  [HttpPost]
-  public async Task<ActionResult> PostAccessRight(BetsyAccessRightRequest request)
-  {
-    return Ok(await _exosService.ExosPostAccessRightDb(request));
-  }
-  [HttpDelete]
-  public ActionResult DeleteDbAccessRight(string id)
-  {
-    _exosService.ExosDeleteAccessRight(id);
-    return NoContent();
   }
 }
 

@@ -9,12 +9,16 @@ public class CardsController : ControllerBase
   private static PersonsController _personClient = default!;
   private readonly HttpClient _client;
   private readonly string? _url;
+  private readonly string? _badgeUrlStart;
+  private readonly string? _badgeUrlEnd;
   private readonly ExosRepository _exosService;
 
   public CardsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
+    _badgeUrlStart = config.GetValue<string>("Url:GetBadgeStart");
+    _badgeUrlEnd = config.GetValue<string>("Url:GetBadgeEnd");
     _exosService = new ExosRepository(_client, context);
     _personClient = new PersonsController(client, config, context);
   }
@@ -24,14 +28,14 @@ public class CardsController : ControllerBase
   {
     try
     {
-      var objectResult = await _exosService.GetExos($"{_url}/api/v1.0/badges?badgeName={badgeName}");
-      var card = JsonConvert.DeserializeObject<ExosBadgeResponse>(objectResult["value"]![0]!.ToString());
+      var objectResult = await _exosService.GetExos($"{_url}{_badgeUrlStart}{badgeName}{_badgeUrlEnd}");
+      var card = JsonConvert.DeserializeObject<List<ExosBadgeResponse>>(objectResult["value"]!.ToString())!.FirstOrDefault();
 
-      var cardResponse =  new BetsyBadgeResponse
-                         {
-                           CardNumber = card!.BadgeName,
-                           //PersonPrimaryId = card.Person.PersonBaseData.PersonalNumber
-                         };
+      var cardResponse = new BetsyBadgeResponse
+      {
+        CardName = card!.BadgeName,
+        PersonalNumber = card.Person.PersonBaseData.PersonalNumber
+      };
 
       return Ok(cardResponse);
     }

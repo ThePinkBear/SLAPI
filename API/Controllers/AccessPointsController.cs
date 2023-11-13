@@ -50,7 +50,7 @@ public class AccessPointsController : ControllerBase
   [HttpPut("{id}/open")]
   public async Task<IActionResult> PutAccessPoint(string id)
   {
-    if ((await GetAccessPoints(id)).Result is NotFoundResult) return BadRequest("No such access point");
+    if ((await GetAccessPoints(id)).Result is NotFoundResult) return BadRequest("No such accesspoint");
 
     var response = await _client.PostAsync($"{_url}/sysops/v1.0/{id}/command/ReleaseOnce/", null);
     return response.IsSuccessStatusCode ? NoContent() : BadRequest();

@@ -1,53 +1,14 @@
 {
   "value": [
     {
-      "PersonBaseData": {
-        "PersonId": "",
-        "LastName": "ApiLastName",
-        "FirstName": "ApiFirstName",
-        "PersonalNumber": ""
-       
-      },
-      "PersonAccessControlData": {
-        "AccessRights": [
-          {
-            "AssignmentId": "Assignment1",
-            "AccessRightId": "",
-            "TimeAccessRightId1ZoneId": "TimeZoneId1",
-            "ValidFrom": "2001-01-31T11:55:00.000",
-            "ValidTo": "2001-01-31T11:55:00.000",
-            "Comment": "",
-            "AccessRight": {
-              "AccessRightId": "AccessRightId1",
-              "DisplayName": "Profile 1",
-              "Comment": "",
-              "ValidFrom": "2001-01-31T11:55:00.000",
-              "ValidTo": "2001-01-31T11:55:00.000"
-            },
-            "TimeZone": {
-              "TimeZoneId": "TimeZoneId1",
-              "DisplayName": "Time zone 1",
-              "Comment": ""
-            }
+      "BadgeId": "",
+      "BadgeName": "ApiCard1",
+      "Comment": "",
+      "Person": {
+        "PersonBaseData": {
+          "PersonalNumber": ""
           }
-        ]
-      },
-      "PersonTenantFreeFields": {
-        "PersonIdInternal": 1,
-        "Text1": "",
-        "Text2": "",
-        "Text3": ""
-      },
-      "Badge": [
-        {
-          "BadgeId": "",
-          "BadgeName": "ApiCard1",
-          "Comment": "",
-          "LastChangeDate": "2001-01-31T11:55:00.000",
-          "ValidFrom": "2001-01-31T11:55:00.000",
-          "ValidTo": "2001-01-31T11:55:00.000"
-        }
-      ]
+      }
     }
   ]
 }
