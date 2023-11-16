@@ -32,10 +32,19 @@ public class PersonsController : ControllerBase
       var personResponse = new BetsyPersonResponse
       {
         PersonId = person!.PersonBaseData.PersonId,
-        PersonalNumber = person.PersonBaseData.PersonalNumber,
+        FullName = person!.PersonBaseData.Fullname,
+        PrimaryId = person.PersonBaseData.PersonalNumber,
         FirstName = person.PersonBaseData.FirstName,
         LastName = person.PersonBaseData.LastName,
-        Department = person.PersonTenantFreeFields.Text3
+        PersonNumber = "",
+        Phone = person.PersonBaseData.PhoneNumber,
+        PersonType = person.PersonTenantFreeFields.PersonType,
+        Company = person.PersonTenantFreeFields.Company,
+        Department = person.PersonBaseData.Department,
+        PinCode = null,
+        IsEnabled = true,
+        Origin = "A",
+        LastModified = new DateTime().ToString()
       };
  
       
@@ -67,7 +76,7 @@ public class PersonsController : ControllerBase
     {
       PersonBaseData = new PersonBaseData
       {
-        PersonalNumber = IsChanged(personRequest.PersonalNumber, personToEditValues!.PersonalNumber),
+        PersonalNumber = IsChanged(personRequest.PersonalNumber, personToEditValues!.PersonId),
         FirstName = IsChanged(personRequest.FirstName, personToEditValues.FirstName),
         LastName = IsChanged(personRequest.LastName, personToEditValues.LastName)
       },
@@ -104,7 +113,7 @@ public class PersonsController : ControllerBase
     };
     var personTenantFreeFields = new PersonTenantFreeFields
     {
-      Text3 = person.Department
+       
     };
     var exosPerson = new ExosPersonRequest
     {

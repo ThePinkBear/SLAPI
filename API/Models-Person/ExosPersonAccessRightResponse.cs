@@ -10,8 +10,6 @@ public class ExosPersonAccessRightResponse
   public string DisplayName { get; set; } = default!;
   [JsonPropertyName("TimeZoneId1")]
   public string TimeZoneId { get; set; } = default!;
-  [JsonPropertyName("Comment")]
-  public string Comment { get; set; } = default!;
   [JsonPropertyName("AccessRight")]
   public ExosAccessRightResponse AccessRight { get; set; } = default!;
   [JsonPropertyName("TimeZone")]

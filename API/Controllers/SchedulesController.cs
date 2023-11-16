@@ -17,25 +17,29 @@ public class SchedulesController : ControllerBase
   }
 
   [HttpGet]
-  public async Task<ActionResult<List<BetsyScheduleResponse>>> GetSchedules()
+  public ActionResult<List<BetsyScheduleResponse>> GetSchedules()
   {
-    try
-    {
-      var response = await _exosService.GetExos<ExosScheduleResponse>($"{_url}{_scheduleUrl}", "value");
+    // try
+    // {
+    //   var response = await _exosService.GetExos<ExosScheduleResponse>($"{_url}{_scheduleUrl}", "value");
 
-      var schedules = from schedule in response
-                      select new BetsyScheduleResponse
-                      {
-                        ScheduleId = schedule.TimeZoneId,
-                        Description = schedule.DisplayName
-                      };
+    //   var schedules = from schedule in response
+    //                   select new BetsyScheduleResponse
+    //                   {
+    //                     ScheduleId = "Always"/*schedule.TimeZoneId*/,
+    //                     Description = "Timezone for KABA"/*schedule.DisplayName*/
+    //                   };
 
-      return schedules == null ? NotFound() : Ok(schedules);
-    }
-    catch (Exception ex)
-    {
-      return BadRequest(ex.Message);
-    }
+    //   return schedules == null ? NotFound() : Ok(schedules);
+    // }
+    // catch (Exception ex)
+    // {
+    //   return BadRequest(ex.Message);
+    // }
+    return Ok( new List<BetsyScheduleResponse>(){ new BetsyScheduleResponse { 
+      ScheduleId = "Always", 
+      Description = "Timezone for KABA" 
+      }});
   }
 }
 

@@ -33,8 +33,8 @@ public class CardsController : ControllerBase
 
       var cardResponse = new BetsyBadgeResponse
       {
-        CardName = card!.BadgeName,
-        PersonalNumber = card.Person.PersonBaseData.PersonalNumber
+        CardNumber = card!.BadgeName,
+        PersonPrimaryId = card.Person.PersonBaseData.PersonalNumber
       };
 
       return Ok(cardResponse);

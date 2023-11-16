@@ -1,0 +1,51 @@
+{
+  "value":[
+    {
+      "PersonBaseData":{
+        "PersonId":"524ab611-787d-4f57-b5ea-9e8f7f23fa5f",
+        "LastName":"First of The Magi",
+        "FirstName":"Bayaz",
+        "PersonalNumber":"9872",
+        "LastChangeDate":"2023-10-03T13:05:55.190",
+        "FullName":"First of The Magi,Bayaz",
+        "PhoneNumber":null,
+        "CompanyEntryDate":null,
+        "EMail":null,
+        "HierarchyFk":null,
+        "PersonType":"Employee",
+        "Text":null,
+        "Comment":null,
+        "DefaultLocationFk":null,
+        "DefaultLocationUid":null,
+        "Nationality":null,
+        "Street":null,
+        "City":null,
+        "Zipcode":null,
+        "Country":null,
+        "OfficialIdcardExpeditionDate":null,
+        "OfficialIdcardExpirationDate":null,
+        "OfficialIdcardMedium":"None",
+        "OfficialIdcardNr":null,
+        "VehicleLicensePlate":null,
+        "VehicleType":null,
+        "VehicleModel":null,
+        "IsActivatedForTimeRegistration":false,
+        "PersIdLastVisited":null,
+        "DateLastUsed":"2023-10-03T13:05:55.180",
+        "CompanyFk":null,
+        "DepartmentFk":null,
+        "PrivacyStatus":0,
+        "OwnerPersonFk":null,
+        "Info":null,
+        "Hierarchy":null,
+        "HasMobileAccessDevice":false
+      },
+      "PersonTenantFreeFields":{
+        "PersonIdInternal":13,
+        "Text1":null,
+        "Text2":null,
+        "Text3":"Juvens Apprentices"
+      }
+    }
+  ]
+}

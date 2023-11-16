@@ -17,7 +17,8 @@ namespace API.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     AssignMentId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PersonId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    PersonId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AccessRightId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

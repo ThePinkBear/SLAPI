@@ -35,12 +35,17 @@ public class PersonController : ControllerBase
 
       try
       {
-        _context.Requests.RemoveRange(_context.Requests.Where(r => r.PersonId == person!.PersonBaseData.PersonId).Select(r => r).ToList());
-        await _context.SaveChangesAsync();
+        if (person?.PersonAccessControlData.accessRights == null) return NotFound($"No person with this Id: {personalNumber} found");
+        var requestsToRemove = _context.Requests
+                               .Where(r => r.PersonId == person.PersonBaseData.PersonId)
+                               .ToList();
+        _context.Requests.RemoveRange(requestsToRemove);
+        if (requestsToRemove != null) await _context.SaveChangesAsync();
         _context.Requests.AddRange(from accessRight in person?.PersonAccessControlData.accessRights select new ExosUnassignRequest()
                           {
                             AssignMentId = accessRight.AssignmentId,
-                            PersonId = person!.PersonBaseData.PersonId
+                            PersonId = person!.PersonBaseData.PersonId,
+                            AccessRightId = accessRight.AccessRightId
                           });
         await _context.SaveChangesAsync();
       }
@@ -54,10 +59,9 @@ public class PersonController : ControllerBase
       result.AddRange(from accessRight in person?.PersonAccessControlData.accessRights
                       select new BetsyAccessRightResponse()
                       {
-                        AccessRightId = accessRight.AssignmentId,
-                        AccessPointId = accessRight.AccessRightId,
-                        PersonPrimaryId = person!.PersonBaseData.PersonalNumber,
-                        ScheduleId = accessRight.TimeZoneId
+                        rid = accessRight.AssignmentId,
+                        aid = accessRight.AccessRight.DisplayName,
+                        sid = "Always"
                       });
 
       return Ok(result);
