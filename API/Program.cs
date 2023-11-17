@@ -1,18 +1,17 @@
 global using Microsoft.EntityFrameworkCore;
+using Microsoft.Build.Framework;
 
-
-string path = @"C:\inetpub\wwwroot\SLAPI\LOGS\Output.txt";
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
     .Enrich.FromLogContext()
-    .WriteTo.File(path, rollingInterval: RollingInterval.Day)
+    .WriteTo.File(@$"{builder.Configuration.GetValue<string>("Settings:LogFIle")!}", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
 // Add services to the container.
-// builder.Host.UseSerilog(); // Use Serilog as the logging framework
+builder.Host.UseSerilog(); // Use Serilog as the logging framework
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -21,7 +20,7 @@ builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 builder.Services.AddHttpClient("ExosClientDev", c =>
 {
   c.DefaultRequestHeaders.Add("Accept", "application/json");
-  c.DefaultRequestHeaders.Add("Authorization", $"Basic {new CredentialsService().Value}");
+  c.DefaultRequestHeaders.Add("Authorization", $"Basic {new CredentialsService(builder.Configuration).Value}");
 }).ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
 {
   ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }

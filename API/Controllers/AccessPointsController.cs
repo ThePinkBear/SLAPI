@@ -21,7 +21,7 @@ public class AccessPointsController : ControllerBase
   [HttpGet]
   public async Task<ActionResult<List<BetsyAccessPointResponse>>> GetAccessPoints([FromQuery] string? accessPointId = null)
   {
-    var devices = await _repo.GetExos<AccessPoint>($"{_url}{_accessPointUrl}", "Value", "Devices");
+    var devices = await _repo.GetExos<ExosAccessPointResponse>($"{_url}{_accessPointUrl}", "Value", "Devices");
 
     var accessPoints =
       from device in devices

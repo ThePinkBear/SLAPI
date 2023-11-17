@@ -41,7 +41,7 @@ public class PersonController : ControllerBase
                                .ToList();
         _context.Requests.RemoveRange(requestsToRemove);
         if (requestsToRemove != null) await _context.SaveChangesAsync();
-        _context.Requests.AddRange(from accessRight in person?.PersonAccessControlData.accessRights select new ExosUnassignRequest()
+        _context.Requests.AddRange(from accessRight in person?.PersonAccessControlData.accessRights select new DbExosUnassignRequest()
                           {
                             AssignMentId = accessRight.AssignmentId,
                             PersonId = person!.PersonBaseData.PersonId,

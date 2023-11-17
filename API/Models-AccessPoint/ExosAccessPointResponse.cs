@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class AccessPoint
+public class ExosAccessPointResponse
 {
   [Key]
   [JsonProperty("Id")]
@@ -9,5 +9,4 @@ public class AccessPoint
   public string AccessPointId { get; set; } = default!;
   [JsonProperty("DeviceAddress")]
   public string Address { get; set; } = default!;
-  public string Description { get; set; } = default!;
 }

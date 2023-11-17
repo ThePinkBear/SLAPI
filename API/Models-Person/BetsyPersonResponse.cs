@@ -2,8 +2,6 @@ namespace SLAPI.Models;
 
 public class BetsyPersonResponse
 {
-  [JsonPropertyName("PersonId")]
-  public string PersonId { get; set; } = default!;
   [JsonPropertyName("FullName")]
   public string FullName { get; set; } = default!;
   [JsonPropertyName("PrimaryId")]
@@ -25,7 +23,7 @@ public class BetsyPersonResponse
   [JsonPropertyName("PinCode")]
   public string? PinCode { get; set; }
   [JsonPropertyName("IsEnabled")]
-  public bool IsEnabled { get; set; }
+  public object? IsEnabled { get; set; }
   [JsonPropertyName("Origin")]
   public string? Origin { get; set; } = "A";
   [JsonPropertyName("LastModified")]

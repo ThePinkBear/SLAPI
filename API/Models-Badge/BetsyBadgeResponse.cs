@@ -2,8 +2,11 @@ namespace SLAPI.Models;
 
 public class BetsyBadgeResponse
 {
-  [JsonPropertyName("CardNumber")]
   public string CardNumber { get; set; } = default!;
-  [JsonPropertyName("PersonPrimaryId")]
   public string PersonPrimaryId { get; set; } = default!;
+  public bool IsReleased { get; internal set; }
+  public string Origin { get; set; } = default!;
+  public string ValidFrom { get; set; } = default!;
+  public string ValidTo { get; set; } = default!;
+  public string LastModified { get; set; } = default!;
 }

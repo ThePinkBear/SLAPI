@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class Person
+public class ExosPerson
 {
   [JsonPropertyName("FullName")]
   public string Fullname { get; set; } = default!;
@@ -20,5 +20,9 @@ public class Person
   public string Department { get; set; } = default!;
   [JsonPropertyName("PinCode")]
   public string PinCode { get; set; } = default!;
+  [JsonPropertyName("IsEnabled")]
+  public bool IsEnabled { get; set; } = default!;
+  [JsonPropertyName("LastChangeDate")]
+  public string LastModified { get; set; } = default!;
   public PersonTenantFreeFields PersonTenantFreeFields { get; set; } = default!;
 }

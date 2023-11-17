@@ -3,7 +3,7 @@ namespace SLAPI.Models;
 public class ExosPersonResponse
 {
   [JsonPropertyName("PersonBaseData")]
-  public Person PersonBaseData { get; set; } = default!;
+  public ExosPerson PersonBaseData { get; set; } = default!;
   [JsonPropertyName("PersonAccessControlData")]
   public ExosAccessControl PersonAccessControlData { get; set; } = default!;
 

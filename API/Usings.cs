@@ -9,3 +9,5 @@ global using System.IO;
 global using Serilog;
 global using Serilog.Events;
 global using Serilog.Extensions.Hosting;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.EntityFrameworkCore;
