@@ -1,7 +1,7 @@
 namespace SLAPI.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class TestController : ControllerBase
+public class MaintenanceController : ControllerBase
 {
   private readonly HttpClient _client;
 
@@ -9,7 +9,7 @@ public class TestController : ControllerBase
   private readonly ILogger<AccessPointsController> _logger;
   private readonly AccessContext _context;
 
-  public TestController(IHttpClientFactory client, AccessContext context, ILogger<AccessPointsController> logger)
+  public MaintenanceController(IHttpClientFactory client, AccessContext context, ILogger<AccessPointsController> logger)
   {
     _client = client.CreateClient("ExosClientDev");
     _exosService = new SourceRepository(_client, context);
@@ -22,11 +22,6 @@ public class TestController : ControllerBase
   {
     return "Hello World";
   }
-  // [HttpGet("AccessRights")]
-  // public List<BetsyAccessRightResponse> GetDBAccessRights()
-  // {
-  //   return _exosService.ExosDbGetAccessRights();
-  // }
   [HttpGet("requestMigrations")]
   public ActionResult Migrations()
   {
