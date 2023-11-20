@@ -6,6 +6,7 @@ public class AccessRightsController : ControllerBase
 {
   private readonly HttpClient _client;
   private readonly string? _url;
+  private readonly string? _accessRightUrl;
   private readonly string? _accessRightUrl1;
   private readonly string? _accessRightUrl2;
   private readonly string? _personUrl1;
@@ -18,6 +19,7 @@ public class AccessRightsController : ControllerBase
     _client = client.CreateClient("ExosClientDev");
     _context = context;
     _url = config.GetValue<string>("ExosUrl");
+    _accessRightUrl = config.GetValue<string>("Url:AccessRight");
     _accessRightUrl1 = config.GetValue<string>("Url:AssignAccessRightStart");
     _accessRightUrl2 = config.GetValue<string>("Url:AssignAccessRightEnd");
     _personUrl1 = config.GetValue<string>("Url:rPersonStart");
@@ -28,13 +30,13 @@ public class AccessRightsController : ControllerBase
   [HttpGet]
   public async Task<ActionResult<List<ReceiverAccessRightResponse>>> HourlyGetAccessRights()
   {
-    var accessRightIds = await _repo.GetExos<SourceAccessRightResponse>("https://exosserver/ExosApi/api/v1.0/accessRights?%24count=true&%24top=1000", "value");
+    var accessRightIds = await _repo.GetExos<SourceAccessRightResponse>($"{_url}{_accessRightUrl}", "value");
 
     Dictionary<string, string> ArIdTzId = new();
 
     foreach (var ar in accessRightIds)
     {
-      var ar2 = await _repo.GetExos<SourceScheduleResponse>($"https://exosserver/ExosApi/api/v1.0/timeZones?accessRightId={ar.AccessRightId}&%24count=true&%24top=4", "value");
+      var ar2 = await _repo.GetExos<SourceScheduleResponse>($"{_url}/api/v1.0/timeZones?accessRightId={ar.AccessRightId}&%24count=true&%24top=4", "value");
 
       ArIdTzId.Add(ar.DisplayName, ar2[0].TimeZoneId);
     }
@@ -58,7 +60,7 @@ public class AccessRightsController : ControllerBase
   {
     try
     {
-      var objectResult = await _repo.GetExos($"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
+      var objectResult = await _repo.GetSource($"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
       var personId = JsonConvert.DeserializeObject<SourcePersonResponse>(objectResult["value"]![0]!.ToString())!.PersonBaseData.PersonId;
       var assignment = new SourceAssignmentRequest
       {
@@ -84,7 +86,7 @@ public class AccessRightsController : ControllerBase
     string? personId = _context.Requests.Where(r => r.AssignMentId == assignmentId).Select(p => p.PersonId).Single();
 
 
-    var path = $"https://exosserver/ExosApi/api/v1.1/persons/{personId}/unassignAccessRight/{assignmentId}";
+    var path = $"{_url}/api/v1.1/persons/{personId}/unassignAccessRight/{assignmentId}";
 
     await _client.PostAsync(path, ByteMaker(new SourceUnassignmentRequest{
       AssignMentId = assignmentId,

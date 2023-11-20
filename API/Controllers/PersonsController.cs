@@ -29,7 +29,7 @@ public class PersonsController : ControllerBase
   {
     try
     {
-      var objectResult = await _exosService.GetExos($"{_url}{_personUrlStart}{personalNumber}{_personUrlEnd}");
+      var objectResult = await _exosService.GetSource($"{_url}{_personUrlStart}{personalNumber}{_personUrlEnd}");
       var person = JsonConvert.DeserializeObject<SourcePersonResponse>(objectResult["value"]![0]!.ToString());
 
       if (_context.PersonNumberLink.FirstOrDefault(x => x.EmployeeNumber == person!.PersonBaseData.PersonalNumber) == null)

@@ -27,7 +27,7 @@ public class PersonController : ControllerBase
   [HttpGet("{personalNumber}")]
   public async Task<ActionResult<List<ReceiverAccessRightResponse>>> GetPersonAccessRights(string personalNumber)
   {
-    var objectResponse = _exosService.GetExos($"{_url}{_personUrl1}{personalNumber}{_personUrl2}").Result;
+    var objectResponse = _exosService.GetSource($"{_url}{_personUrl1}{personalNumber}{_personUrl2}").Result;
 
     try
     {

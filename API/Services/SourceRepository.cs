@@ -25,7 +25,7 @@ public class SourceRepository
     return JsonConvert.DeserializeObject<List<T>>(objectResult[objectDepth]!.ToString())!;
   }
 
-  public async Task<JObject> GetExos(string url)
+  public async Task<JObject> GetSource(string url)
   {
     var response = await _client.GetAsync(url);
     return JObject.Parse(await response.Content.ReadAsStringAsync());

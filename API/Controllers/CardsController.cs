@@ -30,7 +30,7 @@ public class CardsController : ControllerBase
   {
     try
     {
-      var objectResult = await _exosService.GetExos($"{_url}{_badgeUrlStart}{badgeName}{_badgeUrlEnd}");
+      var objectResult = await _exosService.GetSource($"{_url}{_badgeUrlStart}{badgeName}{_badgeUrlEnd}");
       var card = JsonConvert.DeserializeObject<List<SourceBadgeResponse>>(objectResult["value"]!.ToString())!.FirstOrDefault();
 
       var cardResponse = new ReceiverBadgeResponse
