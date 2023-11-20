@@ -1,12 +1,12 @@
-# Mediator API for personell information and access control
+# Mediator API for personnel information and access control
 
 ---
 
-## Reaching out to Source API for access and personell information and delivering the results as JSON to receiving client in format expected
+## Reaching out to Source API for access and personnel information and delivering the results as JSON to receiving client in format expected
 
 Source api is a REST api handling access to lockpoints and personal authentication and authorization database and equipment.
 
-Receiving client is a personell management application managed by HR and access managers in the client company.
+Receiving client is a personnel management application managed by HR and access managers in the client company.
 
 The Receiving Client isn't managed by the Source API owner and thus updates to the latter has caused a mismatch in communication between the two.  
 Therefore the job for this application is to mediate between them to retain functionality for the Receiving Client.
