@@ -1,11 +1,11 @@
 using System.Data;
 
-public class ExosRepository
+public class SourceRepository
 {
   private readonly AccessContext _context;
   private readonly HttpClient _client;
 
-  public ExosRepository(HttpClient client, AccessContext context)
+  public SourceRepository(HttpClient client, AccessContext context)
   {
     _client = client;
     _context = context;

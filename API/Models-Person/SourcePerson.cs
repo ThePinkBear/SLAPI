@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class ExosPerson
+public class SourcePerson
 {
   [JsonPropertyName("FullName")]
   public string Fullname { get; set; } = default!;

@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class BetsyPersonCreateRequest
+public class ReceiverPersonCreateRequest
 {
   [Required]
   [JsonPropertyName("PersonalNumber")]

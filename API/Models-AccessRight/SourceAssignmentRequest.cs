@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class ExosAssignmentRequest
+public class SourceAssignmentRequest
 {
   [JsonPropertyName("AccessRightId")]
   public string AccessRightId { get; set; } = default!;

@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class ExosAccessPointResponse
+public class SourceAccessPointResponse
 {
   [Key]
   [JsonProperty("Id")]

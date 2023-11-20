@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class ExosPersonAccessRightResponse
+public class SourcePersonAccessRightResponse
 {
   [JsonPropertyName("AssignmentId")]
   public string AssignmentId { get; set; } = default!;
@@ -11,9 +11,9 @@ public class ExosPersonAccessRightResponse
   [JsonPropertyName("TimeZoneId1")]
   public string TimeZoneId { get; set; } = default!;
   [JsonPropertyName("AccessRight")]
-  public ExosAccessRightResponse AccessRight { get; set; } = default!;
+  public SourceAccessRightResponse AccessRight { get; set; } = default!;
   [JsonPropertyName("TimeZone")]
-  public ExosScheduleResponse TimeZone { get; set; } = default!;
+  public SourceScheduleResponse TimeZone { get; set; } = default!;
 
 
 }

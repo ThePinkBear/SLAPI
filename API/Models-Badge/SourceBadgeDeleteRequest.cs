@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class ExosBadgeAssignRequest
+public class SourceBadgeDeleteRequest
 {
   [JsonPropertyName("BadgeName")]
   public string BadgeName { get; set; } = default!;

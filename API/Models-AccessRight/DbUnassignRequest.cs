@@ -2,7 +2,7 @@ using NuGet.Protocol.Plugins;
 
 namespace SLAPI.Models;
 
-public class DbExosUnassignRequest
+public class DbUnassignRequest
 {
   [Key]
   public int Id { get; set;}

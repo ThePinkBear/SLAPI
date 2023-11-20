@@ -3,7 +3,7 @@ namespace SLAPI.Controllers;
 [ApiController]
 public class PersonsController : ControllerBase
 {
-  private readonly ExosRepository _exosService;
+  private readonly SourceRepository _exosService;
   private readonly HttpClient _client;
   private readonly string? _url;
   private readonly string? _personUrlStart;
@@ -20,17 +20,17 @@ public class PersonsController : ControllerBase
     _personUrlEnd = config.GetValue<string>("Url:GetOnePersonEnd");
     _deleteUrl = config.GetValue<string>("Url:DeletePerson");
     _createUrl = config.GetValue<string>("Url:CreatePerson");
-    _exosService = new ExosRepository(_client, context);
+    _exosService = new SourceRepository(_client, context);
     _context = context;
   }
 
   [HttpGet("{personalNumber}")]
-  public async Task<ActionResult<BetsyPersonResponse>> GetPerson(string personalNumber)
+  public async Task<ActionResult<ReceiverPersonResponse>> GetPerson(string personalNumber)
   {
     try
     {
       var objectResult = await _exosService.GetExos($"{_url}{_personUrlStart}{personalNumber}{_personUrlEnd}");
-      var person = JsonConvert.DeserializeObject<ExosPersonsResponse>(objectResult["value"]![0]!.ToString());
+      var person = JsonConvert.DeserializeObject<SourcePersonResponse>(objectResult["value"]![0]!.ToString());
 
       if (_context.PersonNumberLink.FirstOrDefault(x => x.EmployeeNumber == person!.PersonBaseData.PersonalNumber) == null)
       {
@@ -49,7 +49,7 @@ public class PersonsController : ControllerBase
         _ => null
       };
       
-      var personResponse = new BetsyPersonResponse
+      var personResponse = new ReceiverPersonResponse
       {
         FullName = person!.PersonBaseData.Fullname,
         PrimaryId = person.PersonBaseData.PersonalNumber,
@@ -81,11 +81,11 @@ public class PersonsController : ControllerBase
 
 
   [HttpPut]
-  public async Task<IActionResult> PutPerson(string personalNumber, BetsyPersonPutRequest personRequest)
+  public async Task<IActionResult> PutPerson(string personalNumber, ReceiverPersonPutRequest personRequest)
   {
     if (String.IsNullOrEmpty(personalNumber) || personRequest == null) return BadRequest();
 
-    var UpdatedPerson = new ExosPersonRequest
+    var UpdatedPerson = new SourcePersonRequest
     {
       PersonBaseData = new PersonBaseData
       { // If not necessary, use betsy object directly.
@@ -115,7 +115,7 @@ public class PersonsController : ControllerBase
   }
 
   [HttpPost]
-  public async Task<ActionResult> PostPerson(BetsyPersonCreateRequest person)
+  public async Task<ActionResult> PostPerson(ReceiverPersonCreateRequest person)
   {
     var createdPerson = new PersonBaseData
     {
@@ -125,7 +125,7 @@ public class PersonsController : ControllerBase
       PhoneNumber = person.PhoneNumber ?? "",
       Department = person.Department ?? ""
     };
-    var exosPerson = new ExosPersonRequest
+    var exosPerson = new SourcePersonRequest
     {
       PersonBaseData = createdPerson
     };

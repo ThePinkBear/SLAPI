@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class BetsyBadgeResponse
+public class ReceiverBadgeResponse
 {
   public string CardNumber { get; set; } = default!;
   public string PersonPrimaryId { get; set; } = default!;

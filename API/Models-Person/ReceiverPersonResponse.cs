@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class BetsyPersonResponse
+public class ReceiverPersonResponse
 {
   [JsonPropertyName("FullName")]
   public string FullName { get; set; } = default!;

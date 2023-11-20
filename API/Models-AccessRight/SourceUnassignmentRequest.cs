@@ -2,7 +2,7 @@ using NuGet.Protocol.Plugins;
 
 namespace SLAPI.Models;
 
-public class ExosUnassignmentRequest
+public class SourceUnassignmentRequest
 {
   [JsonPropertyName("AssignmentId")]
   public string AssignMentId { get; set; } = default!;

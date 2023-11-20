@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class ExosScheduleResponse
+public class SourceScheduleResponse
 {
     [JsonProperty("TimeZoneId")]
     public string TimeZoneId { get; set; } = default!;

@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class ExosBadgePersonResponse
+public class SourceBadgePersonResponse
 {
   [JsonPropertyName("PersonBaseData")]
   public BadgePerson PersonBaseData { get; set; } = default!;

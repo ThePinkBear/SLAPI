@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class BetsyAccessRightRequest
+public class ReceiverAccessRightRequest
 {
   public string BadgeName { get; set; } = default!;
   public string PersonPrimaryId { get; set; } = default!;

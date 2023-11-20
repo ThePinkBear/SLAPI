@@ -6,18 +6,18 @@ public class SchedulesController : ControllerBase
   private readonly HttpClient _client;
   private readonly string? _url;
   private readonly string? _scheduleUrl;
-  private readonly ExosRepository _exosService;
+  private readonly SourceRepository _exosService;
 
   public SchedulesController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
     _scheduleUrl = config.GetValue<string>("Url:Schedule");
-    _exosService = new ExosRepository(_client, context);
+    _exosService = new SourceRepository(_client, context);
   }
 
   [HttpGet]
-  public ActionResult<List<BetsyScheduleResponse>> GetSchedules()
+  public ActionResult<List<ReceiverScheduleResponse>> GetSchedules()
   {
     // try
     // {
@@ -36,7 +36,7 @@ public class SchedulesController : ControllerBase
     // {
     //   return BadRequest(ex.Message);
     // }
-    return Ok( new List<BetsyScheduleResponse>(){ new BetsyScheduleResponse { 
+    return Ok( new List<ReceiverScheduleResponse>(){ new ReceiverScheduleResponse { 
       ScheduleId = "Always", 
       Description = "Timezone for KABA" 
       }});

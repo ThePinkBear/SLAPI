@@ -5,7 +5,7 @@ namespace SLAPI.Controllers;
 [ApiController]
 public class AccessPointsController : ControllerBase
 {
-  private readonly ExosRepository _repo;
+  private readonly SourceRepository _repo;
   private readonly HttpClient _client;
   private readonly string? _url;
   private readonly string? _accessPointUrl;
@@ -15,17 +15,17 @@ public class AccessPointsController : ControllerBase
     _client = client.CreateClient("ExosClientDev");
     _url = config.GetValue<string>("ExosUrl");
     _accessPointUrl = config.GetValue<string>("Url:AccessPoint");
-    _repo = new ExosRepository(_client, context);
+    _repo = new SourceRepository(_client, context);
   }
 
   [HttpGet]
-  public async Task<ActionResult<List<BetsyAccessPointResponse>>> GetAccessPoints([FromQuery] string? accessPointId = null)
+  public async Task<ActionResult<List<ReceiverAccessPointResponse>>> GetAccessPoints([FromQuery] string? accessPointId = null)
   {
-    var devices = await _repo.GetExos<ExosAccessPointResponse>($"{_url}{_accessPointUrl}", "Value", "Devices");
+    var devices = await _repo.GetExos<SourceAccessPointResponse>($"{_url}{_accessPointUrl}", "Value", "Devices");
 
     var accessPoints =
       from device in devices
-      select new BetsyAccessPointResponse
+      select new ReceiverAccessPointResponse
       {
         AccessPointId = device.AccessPointId,
         Address = device.Address,

@@ -1,11 +1,11 @@
 namespace SLAPI.Models;
 
-public class ExosPersonResponse
+public class SourcePersonResponse
 {
   [JsonPropertyName("PersonBaseData")]
-  public ExosPerson PersonBaseData { get; set; } = default!;
+  public SourcePerson PersonBaseData { get; set; } = default!;
   [JsonPropertyName("PersonAccessControlData")]
-  public ExosAccessControl PersonAccessControlData { get; set; } = default!;
+  public SourceAccessControl PersonAccessControlData { get; set; } = default!;
 
   [JsonPropertyName("PersonTenantFreeFields")]
   public PersonTenantFreeFields PersonTenantFreeFields { get; set; } = default!;

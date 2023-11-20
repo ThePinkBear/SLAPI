@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class BetsyAccessRightResponse
+public class ReceiverAccessRightResponse
 {
   public string rid { get; set; } = default!;
   public string aid { get; set; } = default!;

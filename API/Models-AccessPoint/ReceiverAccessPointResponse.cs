@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class BetsyAccessPointResponse
+public class ReceiverAccessPointResponse
 {
   public string AccessPointId { get; set; } = default!;
   public string Address { get; set; } = default!;

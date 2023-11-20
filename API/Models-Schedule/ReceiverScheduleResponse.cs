@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class BetsyScheduleResponse
+public class ReceiverScheduleResponse
 {
   [JsonPropertyName("ScheduleId")]
   public string ScheduleId { get; set; } = default!;

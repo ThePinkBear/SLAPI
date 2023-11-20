@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class BetsyPersonPutRequest
+public class ReceiverPersonPutRequest
 {
   public string PersonalNumber { get; set; } = default!;
   public string FirstName { get; set; } = default!;

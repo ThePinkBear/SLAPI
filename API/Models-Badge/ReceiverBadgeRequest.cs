@@ -1,6 +1,6 @@
 namespace SLAPI.Models;
 
-public class BetsyBadgeRequest
+public class ReceiverBadgeRequest
 {
   [Required]
   [JsonPropertyName("CardNumber")]
