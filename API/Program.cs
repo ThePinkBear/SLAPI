@@ -29,6 +29,15 @@ builder.Services.AddDbContext<AccessContext>(options =>
 {
   options.UseSqlServer(builder.Configuration.GetConnectionString("Exos"));
 });
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("AllowAll", builder =>
+  {
+    builder.AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader();
+  });
+});
 
 var app = builder.Build();
 
@@ -38,6 +47,7 @@ if (app.Environment.IsDevelopment())
   app.UseSwaggerUI();
 }
 
+app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
