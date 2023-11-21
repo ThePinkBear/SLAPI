@@ -42,12 +42,12 @@ public class PersonsController : ControllerBase
         await _context.SaveChangesAsync();
       }
 
-      object? isEnabled = person!.PersonAccessControlData.IsEnabled switch
-      {
-        "Released" => true,
-        "Blocked" => false,
-        _ => null
-      };
+      // object? isEnabled = person!.PersonAccessControlData.IsEnabled switch
+      // {
+      //   "Released" => true,
+      //   "Blocked" => false,
+      //   _ => null
+      // };
       
       var personResponse = new ReceiverPersonResponse
       {
@@ -61,7 +61,7 @@ public class PersonsController : ControllerBase
         Company = person.PersonTenantFreeFields.other,
         Department = person.PersonBaseData.Department,
         PinCode = null,
-        IsEnabled = isEnabled!,
+        // IsEnabled = isEnabled!,
         Origin = "A",
         LastModified = person.PersonBaseData.LastModified
       };
