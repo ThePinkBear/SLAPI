@@ -61,7 +61,7 @@ public class AccessRightsController : ControllerBase
     try
     {
       var objectResult = await _repo.GetSource($"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
-      var personId = JsonConvert.DeserializeObject<SourcePersonResponse>(objectResult["value"]![0]!.ToString())!.PersonBaseData.PersonId;
+      var personId = JsonConvert.DeserializeObject<Value>(objectResult["value"]![0]!.ToString())!.PersonBaseData.PersonId;
       var assignment = new SourceAssignmentRequest
       {
         AccessRightId = accessRight.AccessPointId,

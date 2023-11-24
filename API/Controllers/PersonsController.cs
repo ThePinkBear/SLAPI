@@ -1,4 +1,7 @@
+using System.Text;
+
 namespace SLAPI.Controllers;
+
 [Route("api/[controller]")]
 [ApiController]
 public class PersonsController : ControllerBase
@@ -30,9 +33,11 @@ public class PersonsController : ControllerBase
     try
     {
       var objectResult = await _exosService.GetSource($"{_url}{_personUrlStart}{personalNumber}{_personUrlEnd}");
-      var person = JsonConvert.DeserializeObject<SourcePersonResponse>(objectResult["value"]![0]!.ToString());
+      var person = JsonConvert.DeserializeObject<Root>(objectResult.ToString())!.Value.FirstOrDefault();
 
-      if (_context.PersonNumberLink.FirstOrDefault(x => x.EmployeeNumber == person!.PersonBaseData.PersonalNumber) == null)
+      var DbLink = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == personalNumber);
+
+      if (DbLink == null)
       {
         _context.PersonNumberLink.Add(new PersonNumberDB
         {
@@ -42,26 +47,26 @@ public class PersonsController : ControllerBase
         await _context.SaveChangesAsync();
       }
 
-      // object? isEnabled = person!.PersonAccessControlData.IsEnabled switch
-      // {
-      //   "Released" => true,
-      //   "Blocked" => false,
-      //   _ => null
-      // };
-      
+      var isEnabled = person!.PersonAccessControlData.CurrentCardValidity switch
+      {
+        "Released" => true,
+        null => false,
+        _ => false
+      };
+
       var personResponse = new ReceiverPersonResponse
       {
         FullName = person!.PersonBaseData.Fullname,
         PrimaryId = person.PersonBaseData.PersonalNumber,
         FirstName = person.PersonBaseData.FirstName,
         LastName = person.PersonBaseData.LastName,
-        PersonNumber = person.PersonTenantFreeFields.PersonNumber,
+        PersonNumber = person.PersonTenantFreeFields.Text2,
         Phone = person.PersonBaseData.PhoneNumber,
-        PersonType = person.PersonTenantFreeFields.PersonType,
-        Company = person.PersonTenantFreeFields.other,
-        Department = person.PersonBaseData.Department,
+        PersonType = person.PersonTenantFreeFields.Text3,
+        Company = person.PersonTenantFreeFields.Text1,
+        Department = person.PersonBaseData.Hierarchy,
         PinCode = null,
-        // IsEnabled = isEnabled!,
+        IsEnabled = isEnabled,
         Origin = "A",
         LastModified = person.PersonBaseData.LastModified
       };
@@ -87,26 +92,44 @@ public class PersonsController : ControllerBase
 
     var UpdatedPerson = new SourcePersonRequest
     {
-      PersonBaseData = new PersonBaseData
-      { // If not necessary, use betsy object directly.
-        PersonalNumber = personRequest.PersonalNumber,
-        FirstName = personRequest.FirstName,
-        LastName = personRequest.LastName,
-        PhoneNumber = personRequest!.PhoneNumber,
-        Department = personRequest.Department
+      PersonBaseData = new RequestPersonBaseData
+      {
+        PersonalNumber = personRequest.PrimaryId!,
+        FirstName = personRequest.FirstName!,
+        LastName = personRequest.LastName!,
+        PhoneNumber = personRequest!.Phone!,
+        // Hierarchy = personRequest.Department!
+      },
+      PersonTenantFreeFields = new PersonTenantFreeFields
+      {
+        Text1 = personRequest.Company!,
+        Text2 = personRequest.PersonNumber!,
+        Text3 = personRequest.PersonType!
       }
     };
 
     try
     {
       var personToEdit = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == personalNumber);
-      var response = await _client.PostAsync($"{_url}/api/v1.0/persons/{personToEdit!.PersonalId}/update?ignoreBlacklist=false", ByteMaker(UpdatedPerson));
+      if (personToEdit == null)
+      {
+        var objectResult = await _exosService.GetSource($"{_url}{_personUrlStart}{personalNumber}{_personUrlEnd}");
+        var person = JsonConvert.DeserializeObject<Root>(objectResult.ToString())!.Value.FirstOrDefault();
+        personToEdit = new PersonNumberDB
+        {
+          EmployeeNumber = person!.PersonBaseData.PersonalNumber,
+          PersonalId = person.PersonBaseData.PersonId
+        };
+        _context.PersonNumberLink.Add(personToEdit);
+        await _context.SaveChangesAsync();
+      }
+      var response = await _client.PostAsync($"{_url}/api/v1.0/persons/{personToEdit.PersonalId}/update?ignoreBlacklist=false", ByteMaker(UpdatedPerson));
 
       if (!String.IsNullOrEmpty(personRequest.PinCode))
       {
         await _client.PostAsync($"{_url}/api/v1.0/persons/{personToEdit!.PersonalId}/setPin", ByteMaker(personRequest.PinCode));
       }
-      return Ok(personRequest.PersonalNumber);
+      return Ok(personalNumber);
     }
     catch (Exception ex)
     {
@@ -117,43 +140,47 @@ public class PersonsController : ControllerBase
   [HttpPost]
   public async Task<ActionResult> PostPerson(ReceiverPersonCreateRequest person)
   {
-    var createdPerson = new PersonBaseData
-    {
-      PersonalNumber = person.PersonalNumber,
-      FirstName = person.FirstName ?? "",
-      LastName = person.LastName ?? "",
-      PhoneNumber = person.PhoneNumber ?? "",
-      Department = person.Department ?? ""
-    };
     var exosPerson = new SourcePersonRequest
     {
-      PersonBaseData = createdPerson
-    };
-    try
-    {
-      var posted = await _client.PostAsync($"{_url}{_createUrl}", ByteMaker(exosPerson));
-
-      if (posted.IsSuccessStatusCode && !String.IsNullOrEmpty(person.PinCode))
+      PersonBaseData = new RequestPersonBaseData
       {
-        var response = await GetPerson(person.PersonalNumber!);
-        var personalNumber = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == person.PersonalNumber);
-        await _client.PostAsync($"{_url}/api/v1.0/persons/{personalNumber!.PersonalId}/setPin", ByteMaker(person.PinCode));
+        PersonalNumber = person.PersonalNumber,
+        FirstName = person.FirstName!,
+        LastName = person.LastName!,
+        PhoneNumber = person.PhoneNumber!
+        // Hierarchy = person.Department!
+      },
+      PersonTenantFreeFields = new PersonTenantFreeFields
+      {
+        Text1 = person.Company,
+        Text2 = person.PersonNumber,
+        Text3 = person.PersonType
       }
-      return Ok(person.PersonalNumber);
-    }
-    catch (Exception ex)
+    };
+
+    var posted = await _client.PostAsync($"https://exosserver/ExosApi/api/v1.1/persons/create?ignoreBlacklist=false", ByteMaker(exosPerson));
+
+    if (!String.IsNullOrEmpty(person.PinCode) && posted.IsSuccessStatusCode)
     {
-      return StatusCode(500, ex.Message);
+      await GetPerson(person.PersonalNumber!);
+      var personalNumber = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == person.PersonalNumber);
+      await _client.PostAsync($"{_url}/api/v1.0/persons/{personalNumber!.PersonalId}/setPin", new StringContent(personalNumber.PersonalId, Encoding.UTF8, "application/json"));
     }
+    if (posted.IsSuccessStatusCode) return Ok(person.PersonalNumber);
+    return BadRequest(posted.Content.ReadAsStringAsync());
   }
 
   [HttpDelete("{personalNumber}")]
   public async Task<IActionResult> DeletePerson(string personalNumber)
   {
+    await GetPerson(personalNumber);
     var personalNumberId = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == personalNumber);
     if (String.IsNullOrEmpty(personalNumberId!.PersonalId)) return NotFound();
 
     var response = await _client.PostAsync($"{_url}{_deleteUrl}{personalNumberId.PersonalId}/delete?checkOnly=false", null);
+
+    _context.PersonNumberLink.Remove(personalNumberId);
+    await _context.SaveChangesAsync();
 
     return !response.IsSuccessStatusCode ? StatusCode(500) : NoContent();
   }

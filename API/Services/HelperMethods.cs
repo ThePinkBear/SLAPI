@@ -3,9 +3,9 @@ using System.Net.Http.Headers;
 
 public static class HelperMethods
 {
-  public static ByteArrayContent ByteMaker<T>(T epr)
+  public static HttpContent ByteMaker<T>(T epr)
   {
-    var byteContent = new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(epr)));
+    HttpContent byteContent = new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(epr)));
     byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
     return byteContent;
   }

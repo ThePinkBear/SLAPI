@@ -23,9 +23,9 @@ public class ReceiverPersonResponse
   [JsonPropertyName("PinCode")]
   public string? PinCode { get; set; }
   [JsonPropertyName("IsEnabled")]
-  public object? IsEnabled { get; set; }
+  public bool IsEnabled { get; set; }
   [JsonPropertyName("Origin")]
-  public string? Origin { get; set; } = "A";
+  public string? Origin { get; set; } = default!;
   [JsonPropertyName("LastModified")]
   public string? LastModified { get; set; }
 }

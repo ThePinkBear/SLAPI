@@ -31,17 +31,17 @@ public class PersonController : ControllerBase
 
     try
     {
-      var person = JsonConvert.DeserializeObject<SourcePersonResponse>(objectResponse["value"]![0]!.ToString());
+      var person = JsonConvert.DeserializeObject<Value>(objectResponse["value"]![0]!.ToString());
 
       try
       {
-        if (person?.PersonAccessControlData.accessRights == null) return NotFound($"No person with this Id: {personalNumber} found");
+        if (person?.PersonAccessControlData.AccessRights == null) return NotFound($"No person with this Id: {personalNumber} found");
         var requestsToRemove = _context.Requests
                                .Where(r => r.PersonId == person.PersonBaseData.PersonId)
                                .ToList();
         _context.Requests.RemoveRange(requestsToRemove);
         if (requestsToRemove != null) await _context.SaveChangesAsync();
-        _context.Requests.AddRange(from accessRight in person?.PersonAccessControlData.accessRights select new DbUnassignRequest()
+        _context.Requests.AddRange(from accessRight in person?.PersonAccessControlData.AccessRights select new DbUnassignRequest()
                           {
                             AssignMentId = accessRight.AssignmentId,
                             PersonId = person!.PersonBaseData.PersonId,
@@ -56,7 +56,7 @@ public class PersonController : ControllerBase
 
       var result = new List<ReceiverAccessRightResponse>();
 
-      result.AddRange(from accessRight in person?.PersonAccessControlData.accessRights
+      result.AddRange(from accessRight in person?.PersonAccessControlData.AccessRights
                       select new ReceiverAccessRightResponse()
                       {
                         rid = accessRight.AssignmentId,
