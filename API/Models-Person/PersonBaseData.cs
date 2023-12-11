@@ -23,5 +23,5 @@ public class PersonBaseData
   [JsonPropertyName("IsEnabled")]
   public bool IsEnabled { get; set; } = default!;
   [JsonPropertyName("LastChangeDate")]
-  public string LastModified { get; set; } = default!;
+  public string LastChangeDate { get; set; } = default!;
 }

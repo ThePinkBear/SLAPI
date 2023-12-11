@@ -20,4 +20,6 @@ public class ReceiverPersonPutRequest
   public string? Department { get; set; }
   [JsonPropertyName("PinCode")]
   public string? PinCode { get; set; }
+  // [JsonPropertyName("IsEnabled")]
+  // public int IsEnabled { get; set; } //Confirmed int from Betsy 1 is enabled
 }

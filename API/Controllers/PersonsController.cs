@@ -14,6 +14,7 @@ public class PersonsController : ControllerBase
   private readonly string? _deleteUrl;
   private readonly string? _createUrl;
   private readonly AccessContext _context;
+  private readonly IConfiguration _config;
 
   public PersonsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
@@ -25,6 +26,7 @@ public class PersonsController : ControllerBase
     _createUrl = config.GetValue<string>("Url:CreatePerson");
     _exosService = new SourceRepository(_client, context);
     _context = context;
+    _config = config;
   }
 
   [HttpGet("{personalNumber}")]
@@ -50,7 +52,7 @@ public class PersonsController : ControllerBase
       var isEnabled = person!.PersonAccessControlData.CurrentCardValidity switch
       {
         "Released" => true,
-        null => false,
+        null => true,
         _ => false
       };
 
@@ -68,7 +70,7 @@ public class PersonsController : ControllerBase
         PinCode = null,
         IsEnabled = isEnabled,
         Origin = "A",
-        LastModified = person.PersonBaseData.LastModified
+        LastModified = person.PersonBaseData.LastChangeDate
       };
 
 
@@ -78,14 +80,61 @@ public class PersonsController : ControllerBase
     {
       return NotFound();
     }
+    catch (NullReferenceException)
+    {
+      return NotFound();
+    }
     catch (Exception ex)
     {
       return StatusCode(500, ex.Message);
     }
   }
 
+  // [HttpPost]
+  // public void PostPerson([FromBody]object obj)
+  // {
+  //   System.IO.File.WriteAllText("C:\\Incoming\\POSTperson.json", $"{obj}");
+  // }
+  [HttpPost]
+  public async Task<ActionResult> PostPerson(ReceiverPersonCreateRequest person)
+  {
+    var exosPerson = new SourcePersonRequest
+    {
+      PersonBaseData = new RequestPersonBaseData
+      {
+        PersonalNumber = person.PersonalNumber,
+        FirstName = person.FirstName!,
+        LastName = person.LastName!,
+        PhoneNumber = person.PhoneNumber!
+        // Hierarchy = person.Department!
+      },
+      PersonTenantFreeFields = new PersonTenantFreeFields
+      {
+        Text1 = person.Company,
+        Text2 = person.PersonNumber,
+        Text3 = person.PersonType
+      }
+    };
 
-  [HttpPut]
+    var posted = await _client.PostAsync($"{_url}{_createUrl}", ByteMaker(exosPerson));
+
+    if (!String.IsNullOrEmpty(person.PinCode) && posted.IsSuccessStatusCode)
+    {
+      await GetPerson(person.PersonalNumber!);
+      var personalNumber = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == person.PersonalNumber);
+      await _client.PostAsync($"{_url}/api/v1.0/persons/{personalNumber!.PersonalId}/setPin", new StringContent(personalNumber.PersonalId, Encoding.UTF8, "application/json"));
+    }
+    if (posted.IsSuccessStatusCode) return Ok(person.PersonalNumber);
+    return BadRequest(posted.Content.ReadAsStringAsync());
+  }
+  
+  // [HttpPut("{personalNumber}")]
+  // public void PutPerson(string personalNumber, [FromBody]object obj)
+  // {
+  //   Console.WriteLine(personalNumber);
+  //   System.IO.File.WriteAllText("C:\\Incoming\\PUTperson.json", $"{obj}");
+  // }
+  [HttpPut("{personalNumber}")]
   public async Task<IActionResult> PutPerson(string personalNumber, ReceiverPersonPutRequest personRequest)
   {
     if (String.IsNullOrEmpty(personalNumber) || personRequest == null) return BadRequest();
@@ -136,39 +185,7 @@ public class PersonsController : ControllerBase
       return StatusCode(409, ex.Message);
     }
   }
-
-  [HttpPost]
-  public async Task<ActionResult> PostPerson(ReceiverPersonCreateRequest person)
-  {
-    var exosPerson = new SourcePersonRequest
-    {
-      PersonBaseData = new RequestPersonBaseData
-      {
-        PersonalNumber = person.PersonalNumber,
-        FirstName = person.FirstName!,
-        LastName = person.LastName!,
-        PhoneNumber = person.PhoneNumber!
-        // Hierarchy = person.Department!
-      },
-      PersonTenantFreeFields = new PersonTenantFreeFields
-      {
-        Text1 = person.Company,
-        Text2 = person.PersonNumber,
-        Text3 = person.PersonType
-      }
-    };
-
-    var posted = await _client.PostAsync($"https://exosserver/ExosApi/api/v1.1/persons/create?ignoreBlacklist=false", ByteMaker(exosPerson));
-
-    if (!String.IsNullOrEmpty(person.PinCode) && posted.IsSuccessStatusCode)
-    {
-      await GetPerson(person.PersonalNumber!);
-      var personalNumber = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == person.PersonalNumber);
-      await _client.PostAsync($"{_url}/api/v1.0/persons/{personalNumber!.PersonalId}/setPin", new StringContent(personalNumber.PersonalId, Encoding.UTF8, "application/json"));
-    }
-    if (posted.IsSuccessStatusCode) return Ok(person.PersonalNumber);
-    return BadRequest(posted.Content.ReadAsStringAsync());
-  }
+  
 
   [HttpDelete("{personalNumber}")]
   public async Task<IActionResult> DeletePerson(string personalNumber)

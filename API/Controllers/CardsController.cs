@@ -14,6 +14,7 @@ public class CardsController : ControllerBase
   private readonly string? _badgeUrlEnd;
   private readonly SourceRepository _exosService;
   private readonly AccessContext _context;
+  private readonly IConfiguration _config;
 
   public CardsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
@@ -23,6 +24,7 @@ public class CardsController : ControllerBase
     _badgeUrlEnd = config.GetValue<string>("Url:GetBadgeEnd");
     _exosService = new SourceRepository(_client, context);
     _context = context;
+    _config = config;
   }
 
   [HttpGet("{badgeName?}")]
@@ -37,7 +39,7 @@ public class CardsController : ControllerBase
       {
         CardNumber = card!.BadgeName,
         PersonPrimaryId = card.Person.PersonBaseData.PersonalNumber,
-        IsReleased = card.MediaUsageData.ReleaseState == "Released" ? true : false,
+        IsEnabled = card.MediaUsageData.ReleaseState == "Released" ? true : false,
         Origin = "A",
         ValidTo = card.ValidTo,
         ValidFrom = card.ValidFrom,
@@ -51,6 +53,12 @@ public class CardsController : ControllerBase
       return BadRequest(ex.Message);
     }
   }
+
+  // [HttpPost]
+  // public void PostPerson([FromBody]object obj)
+  // {
+  //   System.IO.File.WriteAllText("C:\\Incoming\\POSTcard.json", $"{obj}");
+  // }
 
   [HttpPost]
   public async Task<ActionResult<string>> CreateCard(ReceiverBadgeRequest badge)
@@ -75,8 +83,8 @@ public class CardsController : ControllerBase
       var response = await _client.PostAsync($"{_url}/api/v1.0/badges/create", ByteMaker(newBadge));
       if (response.IsSuccessStatusCode)
       {
-        var personId = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == badge.PersonalNumber);
-        var person = await _personClient.GetPerson(badge.PersonalNumber);
+        var personId = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == badge.PersonPrimaryId);
+        var person = await _personClient.GetPerson(badge.PersonPrimaryId);
         if (person.Result is NotFoundResult) return NotFound();
         var personResponse = ((OkObjectResult)person.Result!).Value as ReceiverPersonResponse;
         await _client.PostAsync($"{_url}/api/v1.0/persons/{personId!.PersonalId}/assignBadge?ignoreBlacklist=false", ByteMaker(new { BadgeName = badge.CardNumber }));
@@ -89,7 +97,14 @@ public class CardsController : ControllerBase
       return BadRequest(ex.Message);
     }
   }
-
+  
+  [HttpPut("{badgeName}")]
+  public IActionResult UpdateCard(string badgeName, [FromBody]object obj)
+  {
+    System.IO.File.WriteAllText("C:\\Incoming\\PUTcard.json", $"{obj}");
+    return NoContent();
+  }
+  
   [HttpDelete]
   public async Task<IActionResult> DeleteCard(ReceiverBadgeRequest badgeName)
   {
@@ -100,5 +115,6 @@ public class CardsController : ControllerBase
     await _client.PostAsync($"{_url}/api/v1.0/badges/delete", ByteMaker(deleteRequest));
     return NoContent();
   }
+  
 }
 

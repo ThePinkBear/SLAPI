@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
+using System.Reflection;
 
 public static class HelperMethods
 {
@@ -16,6 +17,5 @@ public static class HelperMethods
       true => !String.IsNullOrEmpty(changed) ? changed : "",
       false => !String.IsNullOrEmpty(changed) ? changed : original
     };
-
   }
 }

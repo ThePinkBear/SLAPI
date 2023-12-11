@@ -55,12 +55,17 @@ public class AccessRightsController : ControllerBase
     return Ok(accessRights);
   }
 
-  [HttpPost("{personalNumber}")]
-  public async Task<ActionResult> AssignAccessRight(string personalNumber, ReceiverAccessRightRequest accessRight)
+  // [HttpPost]
+  // public void PostAccessRight([FromBody]object obj)
+  // {
+  //   System.IO.File.WriteAllText("C:\\Incoming\\POSTaccessRight.json", $"{obj}");
+  // }
+  [HttpPost]
+  public async Task<ActionResult> AssignAccessRight(ReceiverAccessRightRequest accessRight)
   {
     try
     {
-      var objectResult = await _repo.GetSource($"{_url}{_personUrl1}{personalNumber}{_personUrl2}");
+      var objectResult = await _repo.GetSource($"{_url}{_personUrl1}{accessRight.PersonPrimaryId}{_personUrl2}");
       var personId = JsonConvert.DeserializeObject<Value>(objectResult["value"]![0]!.ToString())!.PersonBaseData.PersonId;
       var assignment = new SourceAssignmentRequest
       {
@@ -79,6 +84,12 @@ public class AccessRightsController : ControllerBase
     {
       return StatusCode(500, ex.Message);
     }
+  }
+  [HttpPut("{assignmentId}")]
+  public ActionResult UpdateAccessRight(string assignmentId, [FromBody]object obj)
+  {
+    System.IO.File.WriteAllText("C:\\Incoming\\PUTaccessRight.json", $"{obj}");
+    return NoContent();
   }
   [HttpDelete]
   public async Task<ActionResult> DeleteAccessRight(string assignmentId)

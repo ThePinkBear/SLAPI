@@ -6,6 +6,6 @@ public class ReceiverBadgeRequest
   [JsonPropertyName("CardNumber")]
   public string CardNumber { get; set; } = default!;
   [Required]  
-  [JsonPropertyName("PersonalNumber")]
-  public string PersonalNumber { get; set; } = default!;
+  [JsonPropertyName("PersonPrimaryId")]
+  public string PersonPrimaryId { get; set; } = default!;
 }

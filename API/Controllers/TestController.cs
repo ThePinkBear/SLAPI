@@ -31,5 +31,10 @@ public class MaintenanceController : ControllerBase
     }
     return Ok("Migration Complete");
   }
+  [HttpPost]
+  public void Migrations([FromBody]object obj)
+  {
+    System.IO.File.WriteAllText("C:\\Incoming\\something.json", $"{obj}");
+  }
 }
 

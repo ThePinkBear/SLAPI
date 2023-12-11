@@ -19,6 +19,15 @@ public class SchedulesController : ControllerBase
   [HttpGet]
   public ActionResult<List<ReceiverScheduleResponse>> GetSchedules()
   {
+     return Ok(
+      new List<ReceiverScheduleResponse>(){ 
+        new ReceiverScheduleResponse 
+        { 
+          ScheduleId = "Always", 
+          Description = "Timezone for KABA" 
+        }
+      }
+    );
     // try
     // {
     //   var response = await _exosService.GetExos<ExosScheduleResponse>($"{_url}{_scheduleUrl}", "value");
@@ -36,10 +45,7 @@ public class SchedulesController : ControllerBase
     // {
     //   return BadRequest(ex.Message);
     // }
-    return Ok( new List<ReceiverScheduleResponse>(){ new ReceiverScheduleResponse { 
-      ScheduleId = "Always", 
-      Description = "Timezone for KABA" 
-      }});
+   
   }
 }
 
