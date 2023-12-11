@@ -58,7 +58,7 @@ public class AccessRightsController : ControllerBase
   // [HttpPost]
   // public void PostAccessRight([FromBody]object obj)
   // {
-  //   System.IO.File.WriteAllText("C:\\Incoming\\POSTaccessRight.json", $"{obj}");
+  //   System.IO.File.WriteAllText($"C:\\Incoming\\{DateTime.Now.ToString("yyyyMMddHHmmss")}POSTaccessRight.json", $"{obj}");
   // }
   [HttpPost]
   public async Task<ActionResult> AssignAccessRight(ReceiverAccessRightRequest accessRight)
@@ -70,13 +70,17 @@ public class AccessRightsController : ControllerBase
       var assignment = new SourceAssignmentRequest
       {
         AccessRightId = accessRight.AccessPointId,
-        TimeZoneId = accessRight.TimeZoneId
+        TimeZoneId = accessRight.ScheduleId
       };
       
       await _client.PostAsync($"{_url}{_accessRightUrl1}{personId}{_accessRightUrl2}", ByteMaker(assignment));
       return Ok(personId);
     }
     catch (ArgumentOutOfRangeException)
+    {
+      return NotFound();
+    }
+    catch (NullReferenceException)
     {
       return NotFound();
     }

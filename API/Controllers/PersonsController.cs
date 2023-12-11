@@ -93,7 +93,7 @@ public class PersonsController : ControllerBase
   // [HttpPost]
   // public void PostPerson([FromBody]object obj)
   // {
-  //   System.IO.File.WriteAllText("C:\\Incoming\\POSTperson.json", $"{obj}");
+  //   System.IO.File.WriteAllText($"C:\\Incoming\\{DateTime.Now.ToString("yyyyMMddHHmmss")}POSTperson.json", $"{obj}");
   // }
   [HttpPost]
   public async Task<ActionResult> PostPerson(ReceiverPersonCreateRequest person)
@@ -102,10 +102,10 @@ public class PersonsController : ControllerBase
     {
       PersonBaseData = new RequestPersonBaseData
       {
-        PersonalNumber = person.PersonalNumber,
+        PersonalNumber = person.PrimaryId,
         FirstName = person.FirstName!,
         LastName = person.LastName!,
-        PhoneNumber = person.PhoneNumber!
+        PhoneNumber = person.Phone!
         // Hierarchy = person.Department!
       },
       PersonTenantFreeFields = new PersonTenantFreeFields
@@ -120,12 +120,12 @@ public class PersonsController : ControllerBase
 
     if (!String.IsNullOrEmpty(person.PinCode) && posted.IsSuccessStatusCode)
     {
-      await GetPerson(person.PersonalNumber!);
-      var personalNumber = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == person.PersonalNumber);
+      await GetPerson(person.PrimaryId!);
+      var personalNumber = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == person.PrimaryId);
       await _client.PostAsync($"{_url}/api/v1.0/persons/{personalNumber!.PersonalId}/setPin", new StringContent(personalNumber.PersonalId, Encoding.UTF8, "application/json"));
     }
-    if (posted.IsSuccessStatusCode) return Ok(person.PersonalNumber);
-    return BadRequest(posted.Content.ReadAsStringAsync());
+    if (posted.IsSuccessStatusCode) return Ok(person.PrimaryId);
+    return BadRequest();
   }
   
   // [HttpPut("{personalNumber}")]
