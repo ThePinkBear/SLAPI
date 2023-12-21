@@ -3,15 +3,14 @@ using Microsoft.Build.Framework;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
+// Serilog Configuration
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
     .Enrich.FromLogContext()
     .WriteTo.File(@$"{builder.Configuration.GetValue<string>("Settings:LogFIle")!}", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
-// Add services to the container.
-builder.Host.UseSerilog(); // Use Serilog as the logging framework
+builder.Host.UseSerilog(); // Comment out this line to write logs to console instead of file
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -41,14 +40,10 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// if (app.Environment.IsDevelopment())
-// {
-// }
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
-// app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 

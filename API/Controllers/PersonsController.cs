@@ -122,7 +122,7 @@ public class PersonsController : ControllerBase
     {
       await GetPerson(person.PrimaryId!);
       var personalNumber = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == person.PrimaryId);
-      await _client.PostAsync($"{_url}/api/v1.0/persons/{personalNumber!.PersonalId}/setPin", new StringContent(personalNumber.PersonalId, Encoding.UTF8, "application/json"));
+      await _client.PostAsync($"{_url}/api/v1.0/persons/{personalNumber!.PersonalId}/setPin", new StringContent(person.PinCode, Encoding.UTF8, "application/json"));
     }
     if (posted.IsSuccessStatusCode) return Ok(person.PrimaryId);
     return BadRequest();

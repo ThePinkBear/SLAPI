@@ -26,7 +26,7 @@ Therefore the job for this application is to mediate between them to retain func
   * POST `api/accessrights/{personalnumber}`
     * Takes a AccessRight request in the body and assigns to the person associated with the employee number (personalNumber)
   * DELETE
-    * Takes a string value from the body and unassigns an accessright from an employee
+    * Takes an integer value from the body and unassigns an accessright from an employee, the logic is managed from the local DB where the correct string value which is required for the source is stored.
 * CardsController `api/cards`
   * GET `api/cards/{badgeName?}`
     * Takes an optional Cardnumber from the header and delivers one or all available cards, in source named Badges.
@@ -59,11 +59,15 @@ Therefore the job for this application is to mediate between them to retain func
 
 ## Setup and requirements
 
-*This API is a tailored solution to a specific client problem*
+### This API is a tailored solution to a specific client problem
 
 To be able to run this API you need access to the Source API and specify the endpoint URIs in the appsettings.json file.
 
-You will also need a token refress service application that ensures a authentication token is kept alive, the path to this file is also required in the appsettings.json file.
+You will also need a token refresh service application that ensures a authentication token is kept alive, the path to this file is also required in the appsettings.json file.
+
+Some of the endpoints use a local DB setup for logic management, ensure access to the Source API's database is setup and the connectionstring supplied.
+
+DB is managed with entity framework and DBcontext.
 
 Another path that requires specifying in the same is the path to the log file.
 All logs are printed to file using the **Serilog** Nuget package.

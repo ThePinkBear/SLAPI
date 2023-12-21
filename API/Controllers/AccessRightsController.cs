@@ -27,54 +27,49 @@ public class AccessRightsController : ControllerBase
     _repo = new SourceRepository(_client, _context);
   }
 
-  [HttpGet]
-  public async Task<ActionResult<List<ReceiverAccessRightResponse>>> HourlyGetAccessRights()
-  {
-    var accessRightIds = await _repo.GetExos<SourceAccessRightResponse>($"{_url}{_accessRightUrl}", "value");
-
-    Dictionary<string, string> ArIdTzId = new();
-
-    foreach (var ar in accessRightIds)
-    {
-      var ar2 = await _repo.GetExos<SourceScheduleResponse>($"{_url}/api/v1.0/timeZones?accessRightId={ar.AccessRightId}&%24count=true&%24top=4", "value");
-
-      ArIdTzId.Add(ar.DisplayName, ar2[0].TimeZoneId);
-    }
-
-    List<ReceiverAccessRightResponse> accessRights = new();
-
-    foreach (var ar in accessRightIds)
-    {
-      accessRights.Add(new ReceiverAccessRightResponse
-      {
-        rid = ar.AccessRightId,
-        aid = ar.DisplayName,
-        sid = ArIdTzId[ar.DisplayName]
-      });
-    }
-    return Ok(accessRights);
-  }
 
   // [HttpPost]
-  // public void PostAccessRight([FromBody]object obj)
+  // public ActionResult PostAccessRight([FromBody]object obj)
   // {
   //   System.IO.File.WriteAllText($"C:\\Incoming\\{DateTime.Now.ToString("yyyyMMddHHmmss")}POSTaccessRight.json", $"{obj}");
+  //   return Created("Api/r/person", obj);
   // }
+
   [HttpPost]
   public async Task<ActionResult> AssignAccessRight(ReceiverAccessRightRequest accessRight)
   {
     try
     {
-      var objectResult = await _repo.GetSource($"{_url}{_personUrl1}{accessRight.PersonPrimaryId}{_personUrl2}");
-      var personId = JsonConvert.DeserializeObject<Value>(objectResult["value"]![0]!.ToString())!.PersonBaseData.PersonId;
-      var assignment = new SourceAssignmentRequest
+      var personObject = await _repo.GetSource($"{_url}{_personUrl1}{accessRight.PersonPrimaryId}{_personUrl2}");
+      var person = JsonConvert.DeserializeObject<Root>(personObject.ToString())!.Value.FirstOrDefault();
+      var personId = person!.PersonBaseData.PersonId;
+      var assignment = new SourceAssignmentRequest();
+
+      if (_context.AccessRightMatcher.Where(a => a.aid == accessRight.AccessPointId).Count() == 0)
       {
-        AccessRightId = accessRight.AccessPointId,
-        TimeZoneId = accessRight.ScheduleId
-      };
-      
+        var accessRights = await GetAccessRights(_repo, _url!, _accessRightUrl!);
+        assignment.AccessRightId = accessRights.Where(a => a.aid == accessRight.AccessPointId)
+                            .Single()
+                            .rid;
+        assignment.TimeZoneId = accessRights.Where(a => a.aid == accessRight.AccessPointId)
+                        .Single()
+                        .sid;
+      }
+      else
+      {
+        assignment.AccessRightId = _context.AccessRightMatcher.Where(a => a.aid == accessRight.AccessPointId)
+                            .Single()
+                            .rid;
+        assignment.TimeZoneId = _context.AccessRightMatcher.Where(a => a.aid == accessRight.AccessPointId)
+                        .Single()
+                        .sid;
+      }
+
       await _client.PostAsync($"{_url}{_accessRightUrl1}{personId}{_accessRightUrl2}", ByteMaker(assignment));
-      return Ok(personId);
+
+
+      return Created("Api/r/person", accessRight);
+
     }
     catch (ArgumentOutOfRangeException)
     {
@@ -90,23 +85,26 @@ public class AccessRightsController : ControllerBase
     }
   }
   [HttpPut("{assignmentId}")]
-  public ActionResult UpdateAccessRight(string assignmentId, [FromBody]object obj)
+  public ActionResult UpdateAccessRight(int assignmentId, [FromBody] object obj)
   {
-    System.IO.File.WriteAllText("C:\\Incoming\\PUTaccessRight.json", $"{obj}");
+    System.IO.File.WriteAllText("C:\\Incoming\\PUTaccessRight.json", $"{assignmentId}{obj}");
     return NoContent();
   }
   [HttpDelete]
-  public async Task<ActionResult> DeleteAccessRight(string assignmentId)
+  public async Task<ActionResult> DeleteAccessRight(int assignmentId)
   {
-    string? personId = _context.Requests.Where(r => r.AssignMentId == assignmentId).Select(p => p.PersonId).Single();
+    var personId = _context.Requests.Where(r => r.Id == assignmentId).Single();
 
 
-    var path = $"{_url}/api/v1.1/persons/{personId}/unassignAccessRight/{assignmentId}";
+    var path = $"{_url}/api/v1.1/persons/{personId.PersonId}/unassignAccessRight/{personId.AssignMentId}";
 
-    await _client.PostAsync(path, ByteMaker(new SourceUnassignmentRequest{
-      AssignMentId = assignmentId,
-      PersonId = personId
-     }));
+    await _client.PostAsync(path, ByteMaker(new SourceUnassignmentRequest
+    {
+      AssignMentId = personId.AssignMentId,
+      PersonId = personId.PersonId
+    }));
+    _context.Requests.Remove(personId);
+    await _context.SaveChangesAsync();
     return Ok();
   }
 

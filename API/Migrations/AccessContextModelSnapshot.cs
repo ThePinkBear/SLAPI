@@ -20,7 +20,32 @@ namespace API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("SLAPI.Models.ExosUnassignRequest", b =>
+            modelBuilder.Entity("SLAPI.Models.AccessRightMatcher", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("aid")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("rid")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("sid")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AccessRightMatcher");
+                });
+
+            modelBuilder.Entity("SLAPI.Models.DbUnassignRequest", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

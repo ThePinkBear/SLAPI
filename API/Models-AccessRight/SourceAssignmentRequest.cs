@@ -6,6 +6,6 @@ public class SourceAssignmentRequest
   public string AccessRightId { get; set; } = default!;
   [JsonPropertyName("TimeZoneId")]
   public string TimeZoneId { get; set; } = default!;
-  [JsonPropertyName("Comment")]
-  public string Comment { get; set; } = DateTime.Now.ToString();
+  // [JsonPropertyName("Comment")]
+  // public string Comment { get; set; } = DateTime.Now.ToString();
 }

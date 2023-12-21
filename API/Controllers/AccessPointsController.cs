@@ -1,3 +1,4 @@
+using System.Data;
 
 namespace SLAPI.Controllers;
 
@@ -9,6 +10,8 @@ public class AccessPointsController : ControllerBase
   private readonly HttpClient _client;
   private readonly string? _url;
   private readonly string? _accessPointUrl;
+  private readonly AccessContext _context;
+  private readonly string? _accessRightUrl;
 
   public AccessPointsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
@@ -16,6 +19,8 @@ public class AccessPointsController : ControllerBase
     _url = config.GetValue<string>("ExosUrl");
     _accessPointUrl = config.GetValue<string>("Url:AccessPoint");
     _repo = new SourceRepository(_client, context);
+    _context = context;
+    _accessRightUrl = config.GetValue<string>("Url:AccessRight");
   }
 
   [HttpGet]
@@ -31,6 +36,20 @@ public class AccessPointsController : ControllerBase
         Address = device.Address,
         Description = device.AccessPointId
       };
+
+     try
+      {
+        var requestsToRemove = _context.AccessRightMatcher.ToList();
+        _context.AccessRightMatcher.RemoveRange(requestsToRemove);
+        if (requestsToRemove != null) await _context.SaveChangesAsync();
+        var requests = await GetAccessRights(_repo, _url!, _accessRightUrl!);
+        _context.AccessRightMatcher.AddRange(requests);
+        await _context.SaveChangesAsync();
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine(ex.Message);
+      }
 
     if (!String.IsNullOrEmpty(accessPointId))
     {

@@ -7,14 +7,15 @@ namespace SLAPI.Controllers;
 [ApiController]
 public class CardsController : ControllerBase
 {
-  private static PersonsController _personClient = default!;
   private readonly HttpClient _client;
   private readonly string? _url;
   private readonly string? _badgeUrlStart;
   private readonly string? _badgeUrlEnd;
-  private readonly SourceRepository _exosService;
+  private readonly SourceRepository _repo;
   private readonly AccessContext _context;
   private readonly IConfiguration _config;
+  private readonly string? _personUrl1;
+  private readonly string? _personUrl2;
 
   public CardsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
@@ -22,7 +23,9 @@ public class CardsController : ControllerBase
     _url = config.GetValue<string>("ExosUrl");
     _badgeUrlStart = config.GetValue<string>("Url:GetBadgeStart");
     _badgeUrlEnd = config.GetValue<string>("Url:GetBadgeEnd");
-    _exosService = new SourceRepository(_client, context);
+    _personUrl1 = config.GetValue<string>("Url:rPersonStart");
+    _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
+    _repo = new SourceRepository(_client, context);
     _context = context;
     _config = config;
   }
@@ -32,7 +35,7 @@ public class CardsController : ControllerBase
   {
     try
     {
-      var objectResult = await _exosService.GetSource($"{_url}{_badgeUrlStart}{badgeName}{_badgeUrlEnd}");
+      var objectResult = await _repo.GetSource($"{_url}{_badgeUrlStart}{badgeName}{_badgeUrlEnd}");
       var card = JsonConvert.DeserializeObject<List<SourceBadgeResponse>>(objectResult["value"]!.ToString())!.FirstOrDefault();
 
       var cardResponse = new ReceiverBadgeResponse
@@ -68,14 +71,14 @@ public class CardsController : ControllerBase
       var newBadge = new SourceBadgeRequest
       {
         BadgeName = badge.CardNumber,
-        MediaDefinitionFk = 1,
+        MediaDefinitionFk = 2,
         MediaRoleAuthorisation = "All",
         ApplicationDefinitions = new List<ApplicationDefinition>
         {
           new ApplicationDefinition
           {
             BadgeNumber = badge.CardNumber,
-            ApplicationDefinitionFk = 1
+            ApplicationDefinitionFk = 3
           }
         }
       };
@@ -83,11 +86,9 @@ public class CardsController : ControllerBase
       var response = await _client.PostAsync($"{_url}/api/v1.0/badges/create", ByteMaker(newBadge));
       if (response.IsSuccessStatusCode)
       {
-        var personId = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == badge.PersonPrimaryId);
-        var person = await _personClient.GetPerson(badge.PersonPrimaryId);
-        if (person.Result is NotFoundResult) return NotFound();
-        var personResponse = ((OkObjectResult)person.Result!).Value as ReceiverPersonResponse;
-        await _client.PostAsync($"{_url}/api/v1.0/persons/{personId!.PersonalId}/assignBadge?ignoreBlacklist=false", ByteMaker(new { BadgeName = badge.CardNumber }));
+        var personObject = await _repo.GetSource($"{_url}{_personUrl1}{badge.PersonPrimaryId}{_personUrl2}");
+        var person = JsonConvert.DeserializeObject<Root>(personObject.ToString())!.Value.FirstOrDefault();
+        await _client.PostAsync($"{_url}/api/v1.0/persons/{person!.PersonBaseData.PersonId}/assignBadge?ignoreBlacklist=false", ByteMaker(new { BadgeName = badge.CardNumber }));
 
       }
       return NoContent();
@@ -97,14 +98,14 @@ public class CardsController : ControllerBase
       return BadRequest(ex.Message);
     }
   }
-  
+
   [HttpPut("{badgeName}")]
-  public IActionResult UpdateCard(string badgeName, [FromBody]object obj)
+  public IActionResult UpdateCard(string badgeName, [FromBody] object obj)
   {
     System.IO.File.WriteAllText("C:\\Incoming\\PUTcard.json", $"{obj}");
     return NoContent();
   }
-  
+
   [HttpDelete]
   public async Task<IActionResult> DeleteCard(ReceiverBadgeRequest badgeName)
   {
@@ -115,6 +116,6 @@ public class CardsController : ControllerBase
     await _client.PostAsync($"{_url}/api/v1.0/badges/delete", ByteMaker(deleteRequest));
     return NoContent();
   }
-  
+
 }
 

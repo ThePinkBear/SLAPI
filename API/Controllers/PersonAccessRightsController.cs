@@ -36,11 +36,9 @@ public class PersonController : ControllerBase
       try
       {
         if (person?.PersonAccessControlData.AccessRights == null) return NotFound($"No person with this Id: {personalNumber} found");
-        var requestsToRemove = _context.Requests
-                               .Where(r => r.PersonId == person.PersonBaseData.PersonId)
-                               .ToList();
-        _context.Requests.RemoveRange(requestsToRemove);
-        if (requestsToRemove != null) await _context.SaveChangesAsync();
+        await _context.Database.ExecuteSqlAsync($"TRUNCATE TABLE [Requests]");
+        await _context.SaveChangesAsync();
+
         _context.Requests.AddRange(from accessRight in person?.PersonAccessControlData.AccessRights select new DbUnassignRequest()
                           {
                             AssignMentId = accessRight.AssignmentId,
@@ -59,7 +57,7 @@ public class PersonController : ControllerBase
       result.AddRange(from accessRight in person?.PersonAccessControlData.AccessRights
                       select new ReceiverAccessRightResponse()
                       {
-                        rid = accessRight.AssignmentId,
+                        rid = _context.Requests.FirstOrDefault(x => x.AssignMentId == accessRight.AssignmentId)!.Id,
                         aid = accessRight.AccessRight.DisplayName,
                         sid = "Always"
                       });
