@@ -182,7 +182,7 @@ public class PersonsController : ControllerBase
     }
     catch (Exception ex)
     {
-      return StatusCode(409, ex.Message);
+      return StatusCode(500, ex.Message);
     }
   }
   

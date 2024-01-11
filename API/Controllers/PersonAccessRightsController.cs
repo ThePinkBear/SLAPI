@@ -11,7 +11,7 @@ public class PersonController : ControllerBase
   private readonly string? _url;
   private readonly string? _personUrl1;
   private readonly string? _personUrl2;
-  private readonly SourceRepository _exosService;
+  private readonly SourceRepository _repo;
   private readonly AccessContext _context;
 
   public PersonController(IHttpClientFactory client, IConfiguration config, AccessContext context)
@@ -20,14 +20,14 @@ public class PersonController : ControllerBase
     _url = config.GetValue<string>("ExosUrl");
     _personUrl1 = config.GetValue<string>("Url:rPersonStart");
     _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
-    _exosService = new SourceRepository(_client, context);
+    _repo = new SourceRepository(_client, context);
     _context = context;
   }
 
   [HttpGet("{personalNumber}")]
   public async Task<ActionResult<List<ReceiverAccessRightResponse>>> GetPersonAccessRights(string personalNumber)
   {
-    var objectResponse = _exosService.GetSource($"{_url}{_personUrl1}{personalNumber}{_personUrl2}").Result;
+    var objectResponse = _repo.GetSource($"{_url}{_personUrl1}{personalNumber}{_personUrl2}").Result;
 
     try
     {
