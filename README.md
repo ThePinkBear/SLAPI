@@ -87,9 +87,7 @@ You will also need a token refresh service application that ensures a authentica
 
 Some of the endpoints use a local DB setup for logic management, ensure access to the Source API's database is setup and the connectionstring supplied.
 
-DB is managed with entity framework and DBcontext.
-
-Another path that requires specifying in the same is the path to the log file.
+Another path that requires specifying, is the path to the log file.
 All logs are printed to file using the **Serilog** Nuget package.
 This functionality can be disabled by commenting out `line:14` in `program.cs` allowing the application to print to console as default.
 
