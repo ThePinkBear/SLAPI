@@ -1,7 +1,8 @@
-using System.Data;
-using System.IO.Compression;
-
 namespace SLAPI.Controllers;
+
+/// <summary>
+/// the r/person controller which also handles some of the object saving in DB upon being called.
+/// </summary>
 
 [Route("api/r/[controller]")]
 [ApiController]
@@ -36,9 +37,11 @@ public class PersonController : ControllerBase
       try
       {
         if (person?.PersonAccessControlData.AccessRights == null) return NotFound($"No person with this Id: {personalNumber} found");
+        // Brute-forced SQL command to drop table in DB to ensure no out of date objects make their way into the logic.
         await _context.Database.ExecuteSqlAsync($"TRUNCATE TABLE [Requests]");
         await _context.SaveChangesAsync();
 
+        // Saves the link between PersonId and the other Ids required to unassign accessrights in Exos to SLDB, for usage in accessrights controller
         _context.Requests.AddRange(from accessRight in person?.PersonAccessControlData.AccessRights select new DbUnassignRequest()
                           {
                             AssignMentId = accessRight.AssignmentId,
@@ -53,7 +56,7 @@ public class PersonController : ControllerBase
       }
 
       var result = new List<ReceiverAccessRightResponse>();
-
+      // Structures the r/person response object for betsy
       result.AddRange(from accessRight in person?.PersonAccessControlData.AccessRights
                       select new ReceiverAccessRightResponse()
                       {

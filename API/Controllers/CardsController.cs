@@ -12,8 +12,6 @@ public class CardsController : ControllerBase
   private readonly string? _badgeUrlStart;
   private readonly string? _badgeUrlEnd;
   private readonly SourceRepository _repo;
-  private readonly AccessContext _context;
-  private readonly IConfiguration _config;
   private readonly string? _personUrl1;
   private readonly string? _personUrl2;
 
@@ -26,8 +24,6 @@ public class CardsController : ControllerBase
     _personUrl1 = config.GetValue<string>("Url:rPersonStart");
     _personUrl2 = config.GetValue<string>("Url:rPersonEnd");
     _repo = new SourceRepository(_client, context);
-    _context = context;
-    _config = config;
   }
 
   [HttpGet("{badgeName?}")]

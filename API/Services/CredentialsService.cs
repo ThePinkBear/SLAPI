@@ -1,5 +1,9 @@
 using System.Text;
 
+/// <summary>
+/// This is the class that reads the windows registry to access the kept alive access token for Exos
+/// </summary>
+
 public class CredentialsService
 {
   public string Value { get; set; } = "";

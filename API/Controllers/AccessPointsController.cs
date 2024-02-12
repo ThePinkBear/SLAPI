@@ -1,5 +1,3 @@
-using System.Data;
-
 namespace SLAPI.Controllers;
 
 [Route("api/[controller]")]
@@ -23,6 +21,13 @@ public class AccessPointsController : ControllerBase
     _accessRightUrl = config.GetValue<string>("Url:AccessRight");
   }
 
+
+  /// <summary>
+  /// The endpoint is dressed with the optional parameter accessPointId for 
+  /// testing purposes in swagger, 
+  /// it let's you find single accesspoints and only computes if the parameter 
+  /// is submitted.
+  /// </summary>
   [HttpGet]
   public async Task<ActionResult<List<ReceiverAccessPointResponse>>> GetAccessPoints([FromQuery] string? accessPointId = null)
   {
@@ -64,6 +69,10 @@ public class AccessPointsController : ControllerBase
     return accessPoints == null ? NotFound() : Ok(accessPoints);
   }
 
+
+  /// <summary>
+  /// This hasn't been tested with betsy to ensure URI accuracy, you may have to edit line 76 for accuracy later on.
+  /// </summary>
   [HttpPut("{id}/open")]
   public async Task<IActionResult> PutAccessPoint(string id)
   {

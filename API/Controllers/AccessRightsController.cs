@@ -27,7 +27,10 @@ public class AccessRightsController : ControllerBase
     _repo = new SourceRepository(_client, _context);
   }
 
-
+  /// <summary>
+  /// Comment out POST implementation and uncomment this endpoint to write 
+  /// incoming object structure to file.
+  /// </summary>
   // [HttpPost]
   // public ActionResult PostAccessRight([FromBody]object obj)
   // {
@@ -84,18 +87,27 @@ public class AccessRightsController : ControllerBase
       return StatusCode(500, ex.Message);
     }
   }
+ 
+  /// <summary>
+  /// PUT is unused in betsy so this is the write structure of incoming 
+  /// object to file implementation.
+  /// </summary>
+ 
   [HttpPut("{assignmentId}")]
   public ActionResult UpdateAccessRight(int assignmentId, [FromBody] object obj)
   {
     System.IO.File.WriteAllText("C:\\Incoming\\PUTaccessRight.json", $"{assignmentId}{obj}");
     return NoContent();
   }
+
+
   [HttpDelete]
   public async Task<ActionResult> DeleteAccessRight(int assignmentId)
   {
+    // Queries DB for the object linking the personId to assignmentId
     var personId = _context.Requests.Where(r => r.Id == assignmentId).Single();
 
-
+    // Uses the found person ID to structure the path needed to unassign accessrights
     var path = $"{_url}/api/v1.1/persons/{personId.PersonId}/unassignAccessRight/{personId.AssignMentId}";
 
     await _client.PostAsync(path, ByteMaker(new SourceUnassignmentRequest
@@ -103,6 +115,7 @@ public class AccessRightsController : ControllerBase
       AssignMentId = personId.AssignMentId,
       PersonId = personId.PersonId
     }));
+    // Removes the link in DB after the unassign is done in exos
     _context.Requests.Remove(personId);
     await _context.SaveChangesAsync();
     return Ok();

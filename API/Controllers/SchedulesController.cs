@@ -16,6 +16,9 @@ public class SchedulesController : ControllerBase
     _exosService = new SourceRepository(_client, context);
   }
 
+  /// <summary>
+  /// Implementation is currently hard-coded but a possible implementation is commented out below.
+  /// </summary>
   [HttpGet]
   public ActionResult<List<ReceiverScheduleResponse>> GetSchedules()
   {

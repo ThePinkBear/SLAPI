@@ -14,7 +14,6 @@ public class PersonsController : ControllerBase
   private readonly string? _deleteUrl;
   private readonly string? _createUrl;
   private readonly AccessContext _context;
-  private readonly IConfiguration _config;
 
   public PersonsController(IHttpClientFactory client, IConfiguration config, AccessContext context)
   {
@@ -26,7 +25,6 @@ public class PersonsController : ControllerBase
     _createUrl = config.GetValue<string>("Url:CreatePerson");
     _exosService = new SourceRepository(_client, context);
     _context = context;
-    _config = config;
   }
 
   [HttpGet("{personalNumber}")]
@@ -41,6 +39,7 @@ public class PersonsController : ControllerBase
 
       if (DbLink == null)
       {
+        // Saves a link between PersonalNumber used by Betsy as UID and the PersonId Exos uses to reduce calls to exos.
         _context.PersonNumberLink.Add(new PersonNumberDB
         {
           EmployeeNumber = person!.PersonBaseData.PersonalNumber,
@@ -89,12 +88,15 @@ public class PersonsController : ControllerBase
       return StatusCode(500, ex.Message);
     }
   }
-
+  /// <summary>
+  /// Uncomment this endpoint and comment out its implementation to get object structure of incoming object written to file
+  /// </summary>
   // [HttpPost]
   // public void PostPerson([FromBody]object obj)
   // {
   //   System.IO.File.WriteAllText($"C:\\Incoming\\{DateTime.Now.ToString("yyyyMMddHHmmss")}POSTperson.json", $"{obj}");
   // }
+  
   [HttpPost]
   public async Task<ActionResult> PostPerson(ReceiverPersonCreateRequest person)
   {
@@ -106,7 +108,7 @@ public class PersonsController : ControllerBase
         FirstName = person.FirstName!,
         LastName = person.LastName!,
         PhoneNumber = person.Phone!
-        // Hierarchy = person.Department!
+        // Hierarchy = person.Department! Needs to find the FK logic to assign this.
       },
       PersonTenantFreeFields = new PersonTenantFreeFields
       {
@@ -118,11 +120,17 @@ public class PersonsController : ControllerBase
 
     var posted = await _client.PostAsync($"{_url}{_createUrl}", ByteMaker(exosPerson));
 
+    /// <summary>
+    /// Seting a pincode on a person in Exos is done on a separate endpoint.
+    /// This is where the call is made using the PinDecoder class when suitable implementation is discovered.
+    /// Implemented version is prepared on line 135, simply remove the empty string "" and uncomment the PinDecoder
+    /// method call. 
+    /// </summary>
     if (!String.IsNullOrEmpty(person.PinCode) && posted.IsSuccessStatusCode)
     {
       await GetPerson(person.PrimaryId!);
       var personalNumber = await _context.PersonNumberLink.FirstOrDefaultAsync(x => x.EmployeeNumber == person.PrimaryId);
-      await _client.PostAsync($"{_url}/api/v1.0/persons/{personalNumber!.PersonalId}/setPin", new StringContent(person.PinCode, Encoding.UTF8, "application/json"));
+      await _client.PostAsync($"{_url}/api/v1.0/persons/{personalNumber!.PersonalId}/setPin", new StringContent(""/*PinDecoder(person.pinCode) */, Encoding.UTF8, "application/json"));
     }
     if (posted.IsSuccessStatusCode) return Ok(person.PrimaryId);
     return BadRequest();
@@ -147,7 +155,7 @@ public class PersonsController : ControllerBase
         FirstName = personRequest.FirstName!,
         LastName = personRequest.LastName!,
         PhoneNumber = personRequest!.Phone!,
-        // Hierarchy = personRequest.Department!
+        // Hierarchy = personRequest.Department! Needs to find the FK logic to assign this.
       },
       PersonTenantFreeFields = new PersonTenantFreeFields
       {
@@ -176,7 +184,8 @@ public class PersonsController : ControllerBase
 
       if (!String.IsNullOrEmpty(personRequest.PinCode))
       {
-        await _client.PostAsync($"{_url}/api/v1.0/persons/{personToEdit!.PersonalId}/setPin", ByteMaker(personRequest.PinCode));
+        // When pin decoder is completed this line needs the same modification as in POST.
+        await _client.PostAsync($"{_url}/api/v1.0/persons/{personToEdit!.PersonalId}/setPin", ByteMaker("" /*PinDecoder(personRequest.PinCode)*/));
       }
       return Ok(personalNumber);
     }
