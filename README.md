@@ -1,4 +1,4 @@
-# Mediator API for personnel information and access control
+# Integration API for personnel information and access control
 
 ---
 
