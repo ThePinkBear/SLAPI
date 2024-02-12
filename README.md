@@ -19,78 +19,61 @@ Therefore the job for this application is to mediate between them to retain func
   * GET
     * Has optional query string value to get one or get all.
 
-    ![AccessPoints GET](ImgReadMe/image.png)
   * PUT `api/accesspoints/{id}/open`
     * Conveys commands to Source API in order to unlock accesspoints, currently only one command can be conveyed, open.
 
-    ![AccessPoints PUT](ImgReadMe/image2.png)
 * AccessRightsController `api/accessrights`
   * POST `api/accessrights/{personalnumber}`
     * Takes a AccessRight request in the body and assigns to the person associated with the employee number (personalNumber)
 
-    ![AccessRights POST](ImgReadMe/image3.png)
   * PUT
     * Unused endpoint
 
-    ![AccessRights PUT](ImgReadMe/image4.png)
   * DELETE
     * Takes an integer value from the body and unassigns an accessright from an employee, the logic is managed from the local DB where the correct string value which is required for the source is stored.
 
-    ![AccessRights DELETE](ImgReadMe/image5.png)
 * CardsController `api/cards`
   * GET `api/cards/{badgeName?}`
     * Takes an optional Cardnumber from the header and delivers one or all available cards, in source named Badges.
 
-    ![Cards GET](ImgReadMe/image6.png)
   * POST
     * Adds a new card or similar access media to the Source and assigns it to the employee specified in the request body.
 
-    ![Cards POST](ImgReadMe/image7.png)
   * PUT
     * Unused endpoint.
 
-    ![Cards PUT](ImgReadMe/image8.png)
   * DELETE
     * Removes a card or similar access media from Source.
 
-    ![Cards DELETE](ImgReadMe/image9.png)
 
 * PersonsAccessRightsController `api/r/person`
   * GET `api/r/person/{personalnumber}`
     * Lists assigned accessrights on employee.
 
-    ![PersonAccessRights GET](ImgReadMe/image10.png)
 * PersonsController `api/persons`
   * GET `api/persons/{personalNumber}`
     * Returns employee accessdata for one person.
 
-    ![Persons GET](ImgReadMe/image11.png)
   * POST
     * Takes a person request object to register a employee in the Source database.
 
-    ![Persons POST](ImgReadMe/image12.png)
   * PUT
     * Takes a string value; Employee number and a request body to edit employee information.
 
-    ![Persons PUT](ImgReadMe/image13.png)
   * DELETE `api/persons/{personalNumber}`
     * Removes a employee from the Source database.
 
-    ![Persons DELETE](ImgReadMe/image14.png)
 * SchedulesController `api(schedules)`
   * GET
     * Returns Source timezone control information, currently HARDCODED response as the CLient doesn't utilize further functionality but they are integral to the accessright creation process.
 
-    ![Schedules GET](ImgReadMe/image15.png)
 * MaintenanceController `api/Maintenance`
   * GET
     * Returns `"Hello World"` to test if application is successfully deployed.
 
-    ![Maintenance GET](ImgReadMe/image16.png)
   * GET `requestmigrations`
     * Runs the `dotnet ef database update` command to set up database after deployment that is used to store certain information in the mediation process.
 
-    ![Maintenance GET](ImgReadMe/image17.png)
 
 ---
 
