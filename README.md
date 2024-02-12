@@ -98,5 +98,3 @@ This functionality can be disabled by commenting out `line:14` in `program.cs` a
 API is not entirely RESTful and this is intentional as it follows the specifications matching the old Client and the calls and returns it expects.
 
 API is designed and intended to be run in the IIS of the client server that the Client application accesses.
-
-### Endpoint flow infographics
