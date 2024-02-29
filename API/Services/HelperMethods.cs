@@ -7,11 +7,6 @@ public static class HelperMethods
     return byteContent;
   }
 
-  /// <summary>
-  /// A small helper method that checks if a string has been changed from the original and returns accordingly
-  /// Might be redundant but it solved some bugs when trying to make put changes in Swagger so I've left it in 
-  /// to be safe
-  /// </summary>
   public static string IsChanged(string? changed, string? original)
   {
     return String.IsNullOrEmpty(original) switch
@@ -21,12 +16,6 @@ public static class HelperMethods
     };
   }
 
-  /// <summary>
-  /// Handles the link between accessRights and accesspoints and I expect it to be one of the heavier actions 
-  /// in terms of the amount of calls to Exos, I expect yuo'll see if it's problematic in the logs.
-  /// I haven't seen a beter way to refactor it yet though so there it is.
-  /// It's placed here as it is a lot of code and would make the endpoint bloated and unreadable. 
-  /// </summary>
   public static async Task<List<AccessRightMatcher>> GetAccessRights(SourceRepository repo, string url, string accessRightUrl)
   {
     var accessRightIds = await repo.GetExos<SourceAccessRightResponse>($"{url}{accessRightUrl}", "value");
