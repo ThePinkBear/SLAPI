@@ -29,20 +29,13 @@ public class MaintenanceController : ControllerBase
     {
       db.Database.Migrate();
     }
-    // Will only return Ok if migration is successful as obove logic throws error if it isn't and a 500 is returned. but always ensure the creation of the db regardless
     return Ok("Migration Complete");
   }
 
-
-  /// <summary>
-  /// Commented out below is the implementation for post and put methods if the incoming object from betsy
-  /// needs to be printed out for analysis
-  /// </summary>
-  /// 
-  // [HttpPost]
-  // public void Migrations([FromBody]object obj)
-  // {
-  //   System.IO.File.WriteAllText("C:\\Incoming\\something.json", $"{obj}");
-  // }
+  [HttpPost]
+  public void Migrations([FromBody]object obj)
+  {
+    System.IO.File.WriteAllText("C:\\Incoming\\something.json", $"{obj}");
+  }
 }
 
