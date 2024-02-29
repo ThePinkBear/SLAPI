@@ -2,10 +2,10 @@ namespace SLAPI.Models;
 
 public class SourceScheduleResponse
 {
-    [JsonProperty("TimeZoneId")]
+    [JsonPropertyName("TimeZoneId")]
     public string TimeZoneId { get; set; } = default!;
-    [JsonProperty("DisplayName")]
+    [JsonPropertyName("DisplayName")]
     public string DisplayName { get; set; } = default!;
-    [JsonProperty("Comment")]
+    [JsonPropertyName("Comment")]
     public string Comment { get; set; } = default!;
 }
